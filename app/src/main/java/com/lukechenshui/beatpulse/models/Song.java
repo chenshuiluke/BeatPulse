@@ -1,11 +1,11 @@
 package com.lukechenshui.beatpulse.models;
 
+import android.net.Uri;
 import android.util.Log;
 
 import com.lukechenshui.beatpulse.Utility;
 
 import java.io.File;
-import java.net.URI;
 
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
@@ -52,7 +52,7 @@ public class Song extends RealmObject {
         this.name = name;
     }
 
-    public URI getFileURI() {
-        return new File(fileLocation).toURI();
+    public Uri getFileUri() {
+        return Uri.parse(new File(fileLocation).toURI().toString());
     }
 }

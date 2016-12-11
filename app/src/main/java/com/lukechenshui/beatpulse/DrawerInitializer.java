@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.lukechenshui.beatpulse.layout.BrowsingActivity;
+import com.lukechenshui.beatpulse.layout.MainActivity;
+import com.lukechenshui.beatpulse.layout.PlayActivity;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
@@ -26,12 +28,16 @@ public class DrawerInitializer {
     public static Drawer createDrawer(final Context context, final Activity activity, final Toolbar toolbar) {
         PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_item_home);
         SecondaryDrawerItem item2 = new SecondaryDrawerItem().withIdentifier(2).withName(R.string.drawer_item_browse);
-
+        SecondaryDrawerItem item3 = new SecondaryDrawerItem().withIdentifier(3).withName(R.string.drawer_item_now_playing);
         final HashMap<Integer, String> drawerItemNames = new HashMap<>();
         drawerItemNames.put(0, "Home");
         drawerItemNames.put(1, "Browse");
+        drawerItemNames.put(2, "Now Playing");
         final HashMap<Integer, Class> drawerActivities = new HashMap<>();
+
+        drawerActivities.put(0, MainActivity.class);
         drawerActivities.put(1, BrowsingActivity.class);
+        drawerActivities.put(2, PlayActivity.class);
 
         DrawerBuilder drawerBuilder = new DrawerBuilder()
                 .withActivity(activity)
@@ -57,7 +63,8 @@ public class DrawerInitializer {
                 })
                 .addDrawerItems(
                         item1,
-                        item2
+                        item2,
+                        item3
                 );
         Drawer drawer = drawerBuilder.build();
         drawer.setSelectionAtPosition(getSelectedItemPos(), false);
