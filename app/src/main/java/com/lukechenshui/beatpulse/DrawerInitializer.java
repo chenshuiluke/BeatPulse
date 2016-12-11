@@ -7,6 +7,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.common.collect.HashBiMap;
 import com.lukechenshui.beatpulse.layout.BrowsingActivity;
 import com.lukechenshui.beatpulse.layout.MainActivity;
 import com.lukechenshui.beatpulse.layout.PlayActivity;
@@ -23,6 +24,7 @@ import java.util.HashMap;
  */
 
 public class DrawerInitializer {
+    private final static HashBiMap<Integer, Class> drawerActivities = HashBiMap.create();
     private static int selectedItemPos;
 
     public static Drawer createDrawer(final Context context, final Activity activity, final Toolbar toolbar) {
@@ -30,14 +32,15 @@ public class DrawerInitializer {
         SecondaryDrawerItem item2 = new SecondaryDrawerItem().withIdentifier(2).withName(R.string.drawer_item_browse);
         SecondaryDrawerItem item3 = new SecondaryDrawerItem().withIdentifier(3).withName(R.string.drawer_item_now_playing);
         final HashMap<Integer, String> drawerItemNames = new HashMap<>();
-        drawerItemNames.put(0, "Home");
-        drawerItemNames.put(1, "Browse");
-        drawerItemNames.put(2, "Now Playing");
-        final HashMap<Integer, Class> drawerActivities = new HashMap<>();
 
-        drawerActivities.put(0, MainActivity.class);
-        drawerActivities.put(1, BrowsingActivity.class);
-        drawerActivities.put(2, PlayActivity.class);
+        drawerItemNames.put(Config.HOME_DRAWER_ITEM_POS, "Home");
+        drawerItemNames.put(Config.BROWSE_DRAWER_ITEM_POS, "Browse");
+        drawerItemNames.put(Config.NOW_PLAYING_DRAWER_ITEM_POS, "Now Playing");
+
+
+        drawerActivities.put(Config.HOME_DRAWER_ITEM_POS, MainActivity.class);
+        drawerActivities.put(Config.BROWSE_DRAWER_ITEM_POS, BrowsingActivity.class);
+        drawerActivities.put(Config.NOW_PLAYING_DRAWER_ITEM_POS, PlayActivity.class);
 
         DrawerBuilder drawerBuilder = new DrawerBuilder()
                 .withActivity(activity)
@@ -77,5 +80,9 @@ public class DrawerInitializer {
 
     public static void setSelectedItemPos(int selectedItemPos) {
         DrawerInitializer.selectedItemPos = selectedItemPos;
+    }
+
+    public static HashBiMap<Integer, Class> getDrawerActivities() {
+        return drawerActivities;
     }
 }

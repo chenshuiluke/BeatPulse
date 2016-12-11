@@ -8,7 +8,7 @@ import io.realm.RealmObject;
 /**
  * Created by luke on 12/10/16.
  */
-
+//@Parcel
 public class Playlist extends RealmObject {
     private RealmList<Song> songs;
     private String name;

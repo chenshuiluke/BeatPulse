@@ -6,6 +6,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 
+import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.DrawerInitializer;
 import com.lukechenshui.beatpulse.R;
 import com.lukechenshui.beatpulse.Utility;
@@ -29,6 +30,7 @@ public class BrowsingActivity extends ActionBarActivity {
         Drawer drawer = DrawerInitializer.createDrawer(this, this, toolbar);
 
         drawer.getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
+        Config.setActiveDrawer(drawer);
         layoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView = (RecyclerView) findViewById(R.id.browsingRecyclerView);
         recyclerView.setLayoutManager(layoutManager);

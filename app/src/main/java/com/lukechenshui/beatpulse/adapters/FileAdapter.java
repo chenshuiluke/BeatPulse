@@ -1,6 +1,7 @@
 package com.lukechenshui.beatpulse.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.lukechenshui.beatpulse.Config;
+import com.lukechenshui.beatpulse.DrawerInitializer;
 import com.lukechenshui.beatpulse.R;
 import com.lukechenshui.beatpulse.Utility;
 
@@ -68,6 +70,10 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileHolder> {
                             files.clear();
                             files = fileList;
                             notifyDataSetChanged();
+                        } else if (currentFile.getName().endsWith("mp3")) {
+                            Intent intent = new Intent(context, DrawerInitializer.getDrawerActivities().get(Config.NOW_PLAYING_DRAWER_ITEM_POS));
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            context.startActivity(intent);
                         }
                     }
                 }

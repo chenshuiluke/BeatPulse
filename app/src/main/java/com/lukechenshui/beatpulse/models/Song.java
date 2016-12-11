@@ -13,7 +13,7 @@ import io.realm.annotations.PrimaryKey;
 /**
  * Created by luke on 12/10/16.
  */
-
+//@Parcel
 public class Song extends RealmObject {
     @PrimaryKey
     String hash;

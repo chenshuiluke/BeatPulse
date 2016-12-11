@@ -9,6 +9,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.Toast;
 
+import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.DrawerInitializer;
 import com.lukechenshui.beatpulse.R;
 import com.mikepenz.materialdrawer.Drawer;
@@ -42,6 +43,7 @@ public class MainActivity extends ActionBarActivity {
         Drawer drawer = DrawerInitializer.createDrawer(this, this, toolbar);
 
         drawer.getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
+        Config.setActiveDrawer(drawer);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
 
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
