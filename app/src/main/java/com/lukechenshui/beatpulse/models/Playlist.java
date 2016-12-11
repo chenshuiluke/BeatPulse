@@ -1,5 +1,10 @@
 package com.lukechenshui.beatpulse.models;
 
+import com.lukechenshui.beatpulse.realm_parceler_converters.SongListConverter;
+
+import org.parceler.Parcel;
+import org.parceler.ParcelPropertyConverter;
+
 import java.util.ArrayList;
 
 import io.realm.RealmList;
@@ -8,11 +13,15 @@ import io.realm.RealmObject;
 /**
  * Created by luke on 12/10/16.
  */
-//@Parcel
+@Parcel
 public class Playlist extends RealmObject {
+    @ParcelPropertyConverter(SongListConverter.class)
     private RealmList<Song> songs;
     private String name;
     private int lastPlayedPosition = 0;
+
+
+
 
     public Playlist() {
 

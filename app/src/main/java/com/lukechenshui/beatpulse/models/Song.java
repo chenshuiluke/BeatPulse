@@ -5,6 +5,8 @@ import android.util.Log;
 
 import com.lukechenshui.beatpulse.Utility;
 
+import org.parceler.Parcel;
+
 import java.io.File;
 
 import io.realm.RealmObject;
@@ -13,7 +15,7 @@ import io.realm.annotations.PrimaryKey;
 /**
  * Created by luke on 12/10/16.
  */
-//@Parcel
+@Parcel
 public class Song extends RealmObject {
     @PrimaryKey
     String hash;
