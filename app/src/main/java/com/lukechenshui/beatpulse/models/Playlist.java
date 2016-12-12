@@ -14,21 +14,22 @@ import io.realm.annotations.PrimaryKey;
  */
 public class Playlist extends RealmObject implements Parcelable {
 
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<Playlist> CREATOR = new Parcelable.Creator<Playlist>() {
+        @Override
+        public Playlist createFromParcel(Parcel in) {
+            return new Playlist(in);
+        }
+
+        @Override
+        public Playlist[] newArray(int size) {
+            return new Playlist[size];
+        }
+    };
     private RealmList<Song> songs;
     @PrimaryKey
     private String name;
     private int lastPlayedPosition = 0;
-
-    @Override
-    public boolean equals(Object obj) {
-        if(obj instanceof Playlist){
-            Playlist playlistObj = (Playlist)obj;
-            return songs.equals(playlistObj.songs);
-        }
-        else{
-            return false;
-        }
-    }
 
     public Playlist() {
 
@@ -48,6 +49,28 @@ public class Playlist extends RealmObject implements Parcelable {
         }
         this.songs.addAll(songs);
         this.name = name;
+    }
+
+    protected Playlist(Parcel in) {
+        ArrayList<Song> songList = (ArrayList<Song>) in.readValue(RealmList.class.getClassLoader());
+        if (songs == null) {
+            songs = new RealmList<>();
+        } else {
+            songs.clear();
+        }
+        songs.addAll(songList);
+        name = in.readString();
+        lastPlayedPosition = in.readInt();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Playlist) {
+            Playlist playlistObj = (Playlist) obj;
+            return songs.equals(playlistObj.songs);
+        } else {
+            return false;
+        }
     }
 
     public int getLastPlayedPosition() {
@@ -74,19 +97,6 @@ public class Playlist extends RealmObject implements Parcelable {
         this.name = name;
     }
 
-    protected Playlist(Parcel in) {
-        ArrayList<Song> songList = (ArrayList<Song>) in.readValue(RealmList.class.getClassLoader());
-        if(songs == null){
-            songs = new RealmList<>();
-        }
-        else{
-            songs.clear();
-        }
-        songs.addAll(songList);
-        name = in.readString();
-        lastPlayedPosition = in.readInt();
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -99,22 +109,12 @@ public class Playlist extends RealmObject implements Parcelable {
         dest.writeInt(lastPlayedPosition);
     }
 
-    @SuppressWarnings("unused")
-    public static final Parcelable.Creator<Playlist> CREATOR = new Parcelable.Creator<Playlist>() {
-        @Override
-        public Playlist createFromParcel(Parcel in) {
-            return new Playlist(in);
-        }
-
-        @Override
-        public Playlist[] newArray(int size) {
-            return new Playlist[size];
-        }
-    };
-
     public void addSong(Song song){
         ArrayList<Song> temp = new ArrayList<>();
         temp.add(song);
+        if (songs == null) {
+            songs = new RealmList<>();
+        }
         songs.addAll(temp);
     }
 }

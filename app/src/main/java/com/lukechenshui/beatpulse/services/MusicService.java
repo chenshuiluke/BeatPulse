@@ -11,11 +11,8 @@ import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
-import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -78,6 +75,12 @@ public class MusicService extends Service {
             //Catches the exception raised when preparing the same MediaPlayer multiple times.
         }
         player.start();
+        player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                playNext();
+            }
+        });
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
         realm.copyToRealmOrUpdate(song);
@@ -204,15 +207,11 @@ public class MusicService extends Service {
             if(player == null){
                 player = new MediaPlayer();
             }
-            player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mediaPlayer) {
-                    playNext();
-                }
-            });
+
             player.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
             player.setDataSource(getApplicationContext(), songToPlay.getFileUri());
+
             Config.setLastSong(songToPlay, getApplicationContext());
             if(isShowNotification()){
                 showNotification();
@@ -228,7 +227,7 @@ public class MusicService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        if(intent.getAction() != null){
+        if (intent != null && intent.getAction() != null) {
             if (intent.getAction().equals(Config.ACTION.PREV_ACTION)) {
                 Log.i(TAG, "Clicked Previous");
                 playPrevious();
@@ -282,7 +281,7 @@ public class MusicService extends Service {
         Bitmap icon = BitmapFactory.decodeResource(getResources(),
                 R.drawable.ic_music_note_black_24dp);
 
-        Intent playIntent = new Intent(this, MusicService.class);;
+        Intent playIntent = new Intent(this, MusicService.class);
         int playButtonId;
         String playButtonString;
 
@@ -327,13 +326,6 @@ public class MusicService extends Service {
 
     }
 
-
-    public class MusicBinder extends Binder {
-        public MusicService getService(){
-            return MusicService.this;
-        }
-    }
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -367,5 +359,11 @@ public class MusicService extends Service {
             manager.cancelAll();
         }
 
+    }
+
+    public class MusicBinder extends Binder {
+        public MusicService getService() {
+            return MusicService.this;
+        }
     }
 }
