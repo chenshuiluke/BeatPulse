@@ -75,12 +75,17 @@ public class PlayActivity extends ActionBarActivity {
             musicService = binder.getService();
 
             if(musicService.getSong() == null || !musicService.getSong().equals(currentSong)
-                    || !musicService.getPlaylist().equals(currentPlaylist)){
+                    || (!musicService.getPlaylist().equals(currentPlaylist) && currentPlaylist != null)){
                 //Doesn't restart the current song if the new song is the same as the currently playing one.
                 musicService.init(currentSong, currentPlaylist);
             }
-            if(currentPlaylist != null){
-
+            else{
+                currentPlaylist = musicService.getPlaylist();
+                currentSong = musicService.getSong();
+                playOrPauseButton.setImageResource(R.drawable.ic_pause_white_24dp);
+                marqueeTextView.setText(musicService.getSong().getName());
+                Animation marquee = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.marquee);
+                marqueeTextView.startAnimation(marquee);
             }
             try{
                 visualizerView.link(musicService.getPlayer());
@@ -88,7 +93,6 @@ public class PlayActivity extends ActionBarActivity {
             catch (IllegalStateException exc){
                 Log.d(TAG, "Exception when starting visualization", exc);
             }
-            musicService.play();
 
             musicService.setShowNotification(false);
             addBarGraphRenderers();
@@ -219,7 +223,7 @@ public class PlayActivity extends ActionBarActivity {
 
     public void playPreviousSong(View view){
         if(musicService != null){
-            musicService.playNext();
+            musicService.playPrevious();
         }
     }
 

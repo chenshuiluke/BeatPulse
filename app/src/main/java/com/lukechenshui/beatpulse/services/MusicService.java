@@ -72,6 +72,7 @@ public class MusicService extends Service {
     public void play(){
         try{
             player.prepare();
+
         }
         catch (Exception exc){
             //Catches the exception raised when preparing the same MediaPlayer multiple times.
@@ -100,10 +101,7 @@ public class MusicService extends Service {
 
     public void init(Song song, Playlist playlist){
 
-        if(player != null){
-            player.stop();
-            player.release();
-        }
+
         if(song != null){
             this.song = song;
             this.playlist = playlist;
@@ -151,13 +149,14 @@ public class MusicService extends Service {
         int pos = playlist.getLastPlayedPosition();
         RealmList<Song> playlistSongs = playlist.getSongs();
         Song nextSong;
-        if(pos+1 <= playlistSongs.size()){
+        if(pos+1 <= playlistSongs.size()-1){
             pos++;
             playlist.setLastPlayedPosition(pos);
             nextSong = playlistSongs.get(pos);
         }
         else{
             nextSong = playlistSongs.first();
+            playlist.setLastPlayedPosition(0);
         }
         playSong(nextSong);
     }
@@ -172,8 +171,10 @@ public class MusicService extends Service {
             nextSong = playlistSongs.get(pos);
         }
         else{
+            playlist.setLastPlayedPosition(playlistSongs.size()-1);
             nextSong = playlistSongs.last();
         }
+        playSong(nextSong);
     }
 
     private void playSong(Song songToPlay){
