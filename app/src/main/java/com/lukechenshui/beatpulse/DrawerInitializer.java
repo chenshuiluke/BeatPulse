@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.common.collect.HashBiMap;
+import com.lukechenshui.beatpulse.layout.AllSongsActivity;
 import com.lukechenshui.beatpulse.layout.BrowsingActivity;
 import com.lukechenshui.beatpulse.layout.MainActivity;
 import com.lukechenshui.beatpulse.layout.PlayActivity;
@@ -29,16 +30,19 @@ public class DrawerInitializer {
 
     public static Drawer createDrawer(final Context context, final Activity activity, final Toolbar toolbar) {
         PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_item_home);
-        SecondaryDrawerItem item2 = new SecondaryDrawerItem().withIdentifier(2).withName(R.string.drawer_item_browse);
-        SecondaryDrawerItem item3 = new SecondaryDrawerItem().withIdentifier(3).withName(R.string.drawer_item_now_playing);
+        SecondaryDrawerItem item2 = new SecondaryDrawerItem().withIdentifier(2).withName(R.string.all_songs_item_home);
+        SecondaryDrawerItem item3 = new SecondaryDrawerItem().withIdentifier(3).withName(R.string.drawer_item_browse);
+        SecondaryDrawerItem item4 = new SecondaryDrawerItem().withIdentifier(4).withName(R.string.drawer_item_now_playing);
         final HashMap<Integer, String> drawerItemNames = new HashMap<>();
 
         drawerItemNames.put(Config.HOME_DRAWER_ITEM_POS, "Home");
+        drawerItemNames.put(Config.ALL_SONGS_DRAWER_ITEM_POS, "All Songs");
         drawerItemNames.put(Config.BROWSE_DRAWER_ITEM_POS, "Browse");
         drawerItemNames.put(Config.NOW_PLAYING_DRAWER_ITEM_POS, "Now Playing");
 
 
         drawerActivities.put(Config.HOME_DRAWER_ITEM_POS, MainActivity.class);
+        drawerActivities.put(Config.ALL_SONGS_DRAWER_ITEM_POS, AllSongsActivity.class);
         drawerActivities.put(Config.BROWSE_DRAWER_ITEM_POS, BrowsingActivity.class);
         drawerActivities.put(Config.NOW_PLAYING_DRAWER_ITEM_POS, PlayActivity.class);
 
@@ -67,7 +71,8 @@ public class DrawerInitializer {
                 .addDrawerItems(
                         item1,
                         item2,
-                        item3
+                        item3,
+                        item4
                 );
         Drawer drawer = drawerBuilder.build();
         drawer.setSelectionAtPosition(getSelectedItemPos(), false);

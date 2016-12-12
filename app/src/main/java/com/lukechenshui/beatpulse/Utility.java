@@ -69,7 +69,9 @@ public class Utility {
         File[] files = location.listFiles(new FileFilter() {
             @Override
             public boolean accept(File file) {
-                return (file.isDirectory() || file.getName().endsWith("mp3"));
+                return (file.isDirectory() || file.getName().endsWith(".mp3")
+                        || file.getName().endsWith(".flac") || file.getName().endsWith(".ogg")
+                        || file.getName().endsWith(".wav"));
             }
         });
         File parent = location.getParentFile();

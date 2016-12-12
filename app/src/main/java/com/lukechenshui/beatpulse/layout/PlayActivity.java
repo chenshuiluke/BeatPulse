@@ -104,12 +104,11 @@ public class PlayActivity extends ActionBarActivity {
             unbindService(connection);
             bound=false;
         }
+        visualizerView.release();
+        visualizerView.clearRenderers();
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_play);
+    private void init(){
         visualizerView = (VisualizerView) findViewById(R.id.visualizerView);
         LocalBroadcastManager bManager = LocalBroadcastManager.getInstance(getApplicationContext());
 
@@ -148,6 +147,25 @@ public class PlayActivity extends ActionBarActivity {
                 bindService(intent, connection, BIND_AUTO_CREATE);
             }
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        init();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        init();
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_play);
+
     }
 
     public void startOrPauseMediaPlayer(View view){
