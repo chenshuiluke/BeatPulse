@@ -88,7 +88,9 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileHolder> {
 
                             for(File currSong : songsInSameDirectory){
                                 Song newSong = new Song(currSong.getName(), currSong);
-                                realm.copyToRealmOrUpdate(newSong);
+                                if(!newSong.isValid()){
+                                    realm.copyToRealmOrUpdate(newSong);
+                                }
                                 songs.add(newSong);
                             }
                             File parentFile = currentFile.getParentFile();

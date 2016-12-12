@@ -32,11 +32,22 @@ public class MainActivity extends ActionBarActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case REQUEST_PERMISSIONS:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, "Permission granted!", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "Permission denied!", Toast.LENGTH_SHORT).show();
+                if(grantResults.length > 0){
+                    for(int result : grantResults){
+                        if(result != PackageManager.PERMISSION_GRANTED){
+                            finish();
+                        }
+                    }
+                    if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        Toast.makeText(this, "Permission granted!", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "Permission granted!");
+                        init();
+                    } else {
+                        Toast.makeText(this, "Permission denied!", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "Permission denied!");
+                    }
                 }
+
                 break;
         }
     }
@@ -47,18 +58,28 @@ public class MainActivity extends ActionBarActivity {
         Realm.init(getApplicationContext());
         setContentView(R.layout.activity_main);
 
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.RECORD_AUDIO,}, REQUEST_PERMISSIONS);
+        }
+        else{
+            init();
+        }
+
+        startService(new Intent(this, MusicService.class));
+
+    }
+
+    private void init(){
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         Drawer drawer = DrawerInitializer.createDrawer(this, this, toolbar);
 
         drawer.getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
         Config.setActiveDrawer(drawer);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.RECORD_AUDIO,}, REQUEST_PERMISSIONS);
-        }
+
 
         Realm realm = Realm.getDefaultInstance();
         RealmResults<Song> results = realm.where(Song.class).findAll();
@@ -79,8 +100,5 @@ public class MainActivity extends ActionBarActivity {
                 drawer.setSelection(Config.BROWSE_DRAWER_ITEM_POS+1, true);
             }
         }
-
-        startService(new Intent(this, MusicService.class));
-
     }
 }

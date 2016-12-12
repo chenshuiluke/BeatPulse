@@ -72,13 +72,17 @@ public class AllSongAdapter extends RecyclerView.Adapter<AllSongAdapter.SongHold
                         Intent intent = new Intent(context, DrawerInitializer.getDrawerActivities().get(Config.NOW_PLAYING_DRAWER_ITEM_POS));
 
 
-                        Realm realm = Realm.getDefaultInstance();
-                        realm.beginTransaction();
+
                         Playlist playlist = new Playlist(songs, "All Songs");
+                        if(playlist.isValid()){
+                            Realm realm = Realm.getDefaultInstance();
+                            realm.beginTransaction();
+                            realm.copyToRealmOrUpdate(playlist);
+                            realm.commitTransaction();
+                        }
 
-                        realm.copyToRealmOrUpdate(playlist);
 
-                        realm.commitTransaction();
+
                         Bundle bundle = new Bundle();
                         bundle.putParcelable("song", currentSong);
                         bundle.putParcelable("playlust", playlist);
