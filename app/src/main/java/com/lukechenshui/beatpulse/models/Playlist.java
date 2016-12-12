@@ -111,4 +111,10 @@ public class Playlist extends RealmObject implements Parcelable {
             return new Playlist[size];
         }
     };
+
+    public void addSong(Song song){
+        ArrayList<Song> temp = new ArrayList<>();
+        temp.add(song);
+        songs.addAll(temp);
+    }
 }

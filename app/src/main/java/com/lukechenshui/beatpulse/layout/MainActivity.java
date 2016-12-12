@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.DrawerInitializer;
 import com.lukechenshui.beatpulse.R;
+import com.lukechenshui.beatpulse.models.Playlist;
 import com.lukechenshui.beatpulse.models.Song;
 import com.lukechenshui.beatpulse.services.MusicService;
 import com.mikepenz.materialdrawer.Drawer;
@@ -86,6 +87,11 @@ public class MainActivity extends ActionBarActivity {
         drawer.setSelection(Config.HOME_DRAWER_ITEM_POS+1, false);
         for(Song song : results){
             Log.d(TAG, "Song in db: " + song.getName());
+        }
+
+        RealmResults<Playlist> playlistResults = realm.where(Playlist.class).findAll();
+        for(Playlist currPlaylist: playlistResults){
+            Log.d(TAG, "Playlist in db: " + currPlaylist.getName());
         }
 
         if(firstRun){

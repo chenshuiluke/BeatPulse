@@ -116,17 +116,17 @@ public class MusicService extends Service {
                 @Override
                 public void run() {
                     if(playlist == null){
-                        ArrayList<File> songsInSameDirectory = Utility.getListOfAudioFilesInDirectory(getApplicationContext());
-
                         ArrayList<Song> songs = new ArrayList<Song>();
-
-                        for(File currSong : songsInSameDirectory){
-                            Song newSong = new Song(currSong.getName(), currSong);
-                            songs.add(newSong);
-                        }
                         File parentFile = song.getFile().getParentFile();
                         String playlistName = parentFile != null ? parentFile.getName() : "Unknown Playlist";
                         playlist = new Playlist(songs, playlistName);
+                        ArrayList<File> songsInSameDirectory = Utility.getListOfAudioFilesInDirectory(getApplicationContext());
+
+                        for(File currSong : songsInSameDirectory){
+                            Song newSong = new Song(currSong.getName(), currSong);
+                            playlist.addSong(newSong);
+                        }
+
                     }
 
                     if(playlist != null){
@@ -165,8 +165,13 @@ public class MusicService extends Service {
             nextSong = playlistSongs.get(pos);
         }
         else{
-            nextSong = playlistSongs.first();
-            playlist.setLastPlayedPosition(0);
+            if(playlistSongs.size() > 0){
+                nextSong = playlistSongs.first();
+                playlist.setLastPlayedPosition(0);
+            }
+            else{
+                nextSong = song;
+            }
         }
         playSong(nextSong);
     }
@@ -182,7 +187,13 @@ public class MusicService extends Service {
         }
         else{
             playlist.setLastPlayedPosition(playlistSongs.size()-1);
-            nextSong = playlistSongs.last();
+            if(playlistSongs.size() > 0){
+                nextSong = playlistSongs.last();
+            }
+            else{
+                nextSong = song;
+            }
+
         }
         playSong(nextSong);
     }
