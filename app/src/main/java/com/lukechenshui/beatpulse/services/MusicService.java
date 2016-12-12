@@ -27,6 +27,10 @@ import com.lukechenshui.beatpulse.models.Song;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import io.realm.Realm;
 import io.realm.RealmList;
@@ -40,6 +44,7 @@ public class MusicService extends Service {
     Playlist playlist;
     MediaPlayer player;
     boolean showNotification;
+    ExecutorService executor = Executors.newFixedThreadPool(1);
     public MusicService() {
 
     }
@@ -114,7 +119,6 @@ public class MusicService extends Service {
             this.playlist = newPlaylist;
 
             playSong(song);
-
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -146,7 +150,7 @@ public class MusicService extends Service {
                     realm.commitTransaction();
                 }
             });
-            thread.start();
+            executor.submit(thread);
 
         }
     }
@@ -344,11 +348,12 @@ public class MusicService extends Service {
     }
 
     public boolean isShowNotification() {
-        return showNotification;
+        return true;
     }
 
     public void setShowNotification(boolean showNotification) {
-        this.showNotification = showNotification;
+        this.showNotification = true;
+        showNotification = true;
         if(showNotification){
             showNotification();
         }
