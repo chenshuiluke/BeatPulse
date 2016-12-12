@@ -81,29 +81,12 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileHolder> {
                             realm.beginTransaction();
 
                             Song song = new Song(currentFile.getName(), currentFile);
-
-                            ArrayList<File> songsInSameDirectory = Utility.getListOfAudioFilesInDirectory(context);
-
-                            ArrayList<Song> songs = new ArrayList<Song>();
-
-                            for(File currSong : songsInSameDirectory){
-                                Song newSong = new Song(currSong.getName(), currSong);
-                                if(!newSong.isValid()){
-                                    realm.copyToRealmOrUpdate(newSong);
-                                }
-                                songs.add(newSong);
-                            }
                             File parentFile = currentFile.getParentFile();
                             String playlistName = parentFile != null ? parentFile.getName() : "Unknown Playlist";
-                            Playlist playlist = new Playlist(songs, playlistName);
-                            realm.copyToRealmOrUpdate(song);
-                            realm.copyToRealmOrUpdate(playlist);
-
                             Intent intent = new Intent(context, DrawerInitializer.getDrawerActivities().get(Config.NOW_PLAYING_DRAWER_ITEM_POS));
 
                             Bundle bundle = new Bundle();
                             bundle.putParcelable("song", song);
-                            bundle.putParcelable("playlist", playlist);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             intent.putExtras(bundle);
                             realm.commitTransaction();

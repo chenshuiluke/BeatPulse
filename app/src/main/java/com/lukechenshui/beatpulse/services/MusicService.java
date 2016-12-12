@@ -78,6 +78,10 @@ public class MusicService extends Service {
             //Catches the exception raised when preparing the same MediaPlayer multiple times.
         }
         player.start();
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        realm.copyToRealmOrUpdate(song);
+        realm.commitTransaction();
         if(showNotification){
             showNotification();
         }
@@ -99,42 +103,48 @@ public class MusicService extends Service {
         return binder;
     }
 
-    public void init(Song song, Playlist playlist){
+    public void init(final Song song, Playlist newPlaylist){
 
 
         if(song != null){
             this.song = song;
-            this.playlist = playlist;
-
-            if(this.playlist == null){
-                Realm realm = Realm.getDefaultInstance();
-                realm.beginTransaction();
-                ArrayList<File> songsInSameDirectory = Utility.getListOfAudioFilesInDirectory(getApplicationContext());
-
-                ArrayList<Song> songs = new ArrayList<Song>();
-
-                for(File currSong : songsInSameDirectory){
-                    Song newSong = new Song(currSong.getName(), currSong);
-                    realm.copyToRealmOrUpdate(newSong);
-                    songs.add(newSong);
-                }
-                File parentFile = song.getFile().getParentFile();
-                String playlistName = parentFile != null ? parentFile.getName() : "Unknown Playlist";
-                this.playlist = new Playlist(songs, playlistName);
-                realm.copyToRealmOrUpdate(song);
-                realm.copyToRealmOrUpdate(this.playlist);
-                realm.commitTransaction();
-            }
-
-            if(this.playlist != null){
-                RealmList<Song> playListSongs = this.playlist.getSongs();
-                if(playListSongs.contains(song)){
-                    this.playlist.setLastPlayedPosition(playListSongs.lastIndexOf(song));
-                }
-            }
-
+            this.playlist = newPlaylist;
 
             playSong(song);
+
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if(playlist == null){
+                        ArrayList<File> songsInSameDirectory = Utility.getListOfAudioFilesInDirectory(getApplicationContext());
+
+                        ArrayList<Song> songs = new ArrayList<Song>();
+
+                        for(File currSong : songsInSameDirectory){
+                            Song newSong = new Song(currSong.getName(), currSong);
+                            songs.add(newSong);
+                        }
+                        File parentFile = song.getFile().getParentFile();
+                        String playlistName = parentFile != null ? parentFile.getName() : "Unknown Playlist";
+                        playlist = new Playlist(songs, playlistName);
+                    }
+
+                    if(playlist != null){
+                        RealmList<Song> playListSongs = playlist.getSongs();
+                        if(playListSongs.contains(song)){
+                            playlist.setLastPlayedPosition(playListSongs.lastIndexOf(song));
+                        }
+                    }
+
+                    Realm realm = Realm.getDefaultInstance();
+                    realm.beginTransaction();
+                    realm.copyToRealmOrUpdate(song);
+                    realm.copyToRealmOrUpdate(playlist);
+                    realm.commitTransaction();
+                }
+            });
+            thread.start();
+
         }
     }
 
