@@ -22,6 +22,21 @@ public class Config {
     private static Drawer activeDrawer;
     private static Song lastSong;
 
+    public interface ACTION {
+        public static String MAIN_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.main";
+        public static String INIT_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.init";
+        public static String PREV_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.prev";
+        public static String PLAY_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.play";
+        public static String PAUSE_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.pause";
+        public static String NEXT_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.next";
+        public static String STARTFOREGROUND_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.startforeground";
+        public static String STOPFOREGROUND_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.stopforeground";
+    }
+
+    public interface NOTIFICATION_ID {
+        public static int MUSIC_SERVICE = 101;
+    }
+    
     public static String getLastFolderLocation(Context context) {
         SharedPreferences sharedPref = context.getSharedPreferences(
                 context.getString(R.string.preference_file_key), Context.MODE_PRIVATE);

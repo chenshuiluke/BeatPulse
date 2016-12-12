@@ -78,6 +78,8 @@ public class PlayActivity extends ActionBarActivity {
                 Log.d(TAG, "Exception when starting visualization", exc);
             }
             musicService.play();
+
+            musicService.setShowNotification(false);
             addBarGraphRenderers();
             addCircleBarRenderer();
 
@@ -100,12 +102,19 @@ public class PlayActivity extends ActionBarActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        musicService.setShowNotification(true);
         if(bound){
             unbindService(connection);
             bound=false;
         }
         visualizerView.release();
         visualizerView.clearRenderers();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        musicService.setShowNotification(true);
     }
 
     private void init(){
@@ -165,7 +174,6 @@ public class PlayActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
-
     }
 
     public void startOrPauseMediaPlayer(View view){
