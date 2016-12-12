@@ -21,21 +21,34 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true">
+        android:layout_centerHorizontal="true"
+        android:id="@+id/buttonBar">
         <at.markushi.ui.CircleButton
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:src="@drawable/ic_skip_previous_white_48dp"
-            app:cb_color="?attr/colorPrimary"/>
+            app:cb_color="?attr/colorPrimary"
+            android:id="@+id/previousSongButton"/>
         <at.markushi.ui.CircleButton
             android:layout_width="64dp"
             android:layout_height="64dp"
             android:src="@drawable/ic_play_arrow_white_48dp"
-            app:cb_color="?attr/colorPrimary"/>
+            app:cb_color="?attr/colorPrimary"
+            android:id="@+id/playOrPauseButton"
+            android:onClick="startOrPauseMediaPlayer"/>
         <at.markushi.ui.CircleButton
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:src="@drawable/ic_skip_next_white_48dp"
-            app:cb_color="?attr/colorPrimary"/>
+            app:cb_color="?attr/colorPrimary"
+            android:id="@+id/nextSongButton"/>
     </android.support.v7.widget.ButtonBarLayout>
+
+    <com.lukechenshui.beatpulse.visualizer.VisualizerView
+        android:id="@+id/visualizerView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_above="@+id/buttonBar"
+        android:layout_below="@+id/thirdToolbar">
+    </com.lukechenshui.beatpulse.visualizer.VisualizerView>
 </RelativeLayout>

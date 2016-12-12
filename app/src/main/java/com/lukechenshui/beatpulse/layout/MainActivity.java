@@ -1,6 +1,7 @@
 package com.lukechenshui.beatpulse.layout;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -12,7 +13,10 @@ import android.widget.Toast;
 import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.DrawerInitializer;
 import com.lukechenshui.beatpulse.R;
+import com.lukechenshui.beatpulse.services.MusicService;
 import com.mikepenz.materialdrawer.Drawer;
+
+import io.realm.Realm;
 
 public class MainActivity extends ActionBarActivity {
     private static final String TAG = "MainActivity";
@@ -35,8 +39,8 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Realm.init(getApplicationContext());
         setContentView(R.layout.activity_main);
-
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -44,11 +48,14 @@ public class MainActivity extends ActionBarActivity {
 
         drawer.getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
         Config.setActiveDrawer(drawer);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED &&
-
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_PERMISSIONS);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.RECORD_AUDIO,}, REQUEST_PERMISSIONS);
         }
+
+        startService(new Intent(this, MusicService.class));
 
     }
 }

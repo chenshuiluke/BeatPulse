@@ -1,11 +1,12 @@
 package com.lukechenshui.beatpulse.models;
 
 import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import com.lukechenshui.beatpulse.Utility;
 
-import org.parceler.Parcel;
 
 import java.io.File;
 
@@ -15,8 +16,8 @@ import io.realm.annotations.PrimaryKey;
 /**
  * Created by luke on 12/10/16.
  */
-@Parcel
-public class Song extends RealmObject {
+
+public class Song extends RealmObject implements Parcelable {
     @PrimaryKey
     String hash;
     String name;
@@ -57,4 +58,35 @@ public class Song extends RealmObject {
     public Uri getFileUri() {
         return Uri.parse(new File(fileLocation).toURI().toString());
     }
+
+    protected Song(Parcel in) {
+        hash = in.readString();
+        name = in.readString();
+        fileLocation = in.readString();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(hash);
+        dest.writeString(name);
+        dest.writeString(fileLocation);
+    }
+
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<Song> CREATOR = new Parcelable.Creator<Song>() {
+        @Override
+        public Song createFromParcel(Parcel in) {
+            return new Song(in);
+        }
+
+        @Override
+        public Song[] newArray(int size) {
+            return new Song[size];
+        }
+    };
 }
