@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.models.Playlist;
 import com.lukechenshui.beatpulse.models.Song;
 
@@ -72,6 +73,7 @@ public class MusicService extends Service {
             player.setAudioStreamType(AudioManager.STREAM_MUSIC);
             try{
                 player.setDataSource(getApplicationContext(), song.getFileUri());
+                Config.setLastSong(song, getApplicationContext());
             }
             catch (IOException exc){
                 Log.d(TAG, "An exception occurred while loading song " + song.getFileUri(), exc);
@@ -107,5 +109,9 @@ public class MusicService extends Service {
 
     public void setPlayer(MediaPlayer player) {
         this.player = player;
+    }
+
+    public Song getSong() {
+        return song;
     }
 }

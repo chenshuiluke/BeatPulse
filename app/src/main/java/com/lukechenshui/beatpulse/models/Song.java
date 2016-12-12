@@ -59,6 +59,10 @@ public class Song extends RealmObject implements Parcelable {
         return Uri.parse(new File(fileLocation).toURI().toString());
     }
 
+    public File getFile(){
+        return new File(fileLocation);
+    }
+
     protected Song(Parcel in) {
         hash = in.readString();
         name = in.readString();
@@ -89,4 +93,15 @@ public class Song extends RealmObject implements Parcelable {
             return new Song[size];
         }
     };
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Song){
+            Song songObj = (Song)obj;
+            return hash.equals(songObj.hash);
+        }
+        else{
+            return false;
+        }
+    }
 }

@@ -36,7 +36,7 @@ public class BrowsingActivity extends ActionBarActivity {
         recyclerView.setLayoutManager(layoutManager);
         ArrayList<File> files = Utility.getListOfAudioFilesInDirectory(getApplicationContext());
 
-        FileAdapter fileAdapter = new FileAdapter(files, getApplicationContext());
+        FileAdapter fileAdapter = new FileAdapter(files, this);
         recyclerView.setAdapter(fileAdapter);
     }
 }

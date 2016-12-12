@@ -1,5 +1,6 @@
 package com.lukechenshui.beatpulse.adapters;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -84,14 +85,13 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileHolder> {
 
                             Intent intent = new Intent(context, DrawerInitializer.getDrawerActivities().get(Config.NOW_PLAYING_DRAWER_ITEM_POS));
 
-                            Config.getActiveDrawer().setSelection(Config.NOW_PLAYING_DRAWER_ITEM_POS, false);
-
                             Bundle bundle = new Bundle();
                             bundle.putParcelable("song", song);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             intent.putExtras(bundle);
                             realm.commitTransaction();
                             context.startActivity(intent);
+                            ((Activity)context).finish();
                         }
                     }
                 }
