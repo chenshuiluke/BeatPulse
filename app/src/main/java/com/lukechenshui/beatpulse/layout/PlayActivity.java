@@ -24,6 +24,7 @@ import android.widget.TextView;
 import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.DrawerInitializer;
 import com.lukechenshui.beatpulse.R;
+import com.lukechenshui.beatpulse.models.Playlist;
 import com.lukechenshui.beatpulse.models.Song;
 import com.lukechenshui.beatpulse.services.MusicService;
 import com.lukechenshui.beatpulse.visualizer.VisualizerView;
@@ -46,6 +47,7 @@ public class PlayActivity extends ActionBarActivity {
 
 
     private Song currentSong;
+    private Playlist currentPlaylist;
 
     private boolean bound;
     private BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -53,9 +55,15 @@ public class PlayActivity extends ActionBarActivity {
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals("MEDIA_PLAYER_PAUSED")){
                 playOrPauseButton.setImageResource(R.drawable.ic_play_arrow_white_24dp);
+                marqueeTextView.setText(musicService.getSong().getName());
+                Animation marquee = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.marquee);
+                marqueeTextView.startAnimation(marquee);
             }
             else if(intent.getAction().equals("MEDIA_PLAYER_STARTED")){
                 playOrPauseButton.setImageResource(R.drawable.ic_pause_white_24dp);
+                marqueeTextView.setText(musicService.getSong().getName());
+                Animation marquee = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.marquee);
+                marqueeTextView.startAnimation(marquee);
             }
             Log.d(TAG, "Received broadcast: " + intent.getAction());
         }
@@ -66,11 +74,14 @@ public class PlayActivity extends ActionBarActivity {
             MusicService.MusicBinder binder = (MusicService.MusicBinder)iBinder;
             musicService = binder.getService();
 
-            if(musicService.getSong() == null || !musicService.getSong().equals(currentSong)){
+            if(musicService.getSong() == null || !musicService.getSong().equals(currentSong)
+                    || !musicService.getPlaylist().equals(currentPlaylist)){
                 //Doesn't restart the current song if the new song is the same as the currently playing one.
-                musicService.init(currentSong);
+                musicService.init(currentSong, currentPlaylist);
             }
+            if(currentPlaylist != null){
 
+            }
             try{
                 visualizerView.link(musicService.getPlayer());
             }
@@ -102,19 +113,31 @@ public class PlayActivity extends ActionBarActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        musicService.setShowNotification(true);
+        if(musicService != null){
+            musicService.setShowNotification(true);
+        }
+
         if(bound){
             unbindService(connection);
             bound=false;
         }
-        visualizerView.release();
-        visualizerView.clearRenderers();
+        try{
+            visualizerView.release();
+            visualizerView.clearRenderers();
+        }
+        catch (NullPointerException exc){
+
+        }
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        musicService.setShowNotification(true);
+        if(musicService != null){
+            musicService.setShowNotification(true);
+        }
+
     }
 
     private void init(){
@@ -143,6 +166,7 @@ public class PlayActivity extends ActionBarActivity {
         drawer.setSelection(Config.NOW_PLAYING_DRAWER_ITEM_POS+1, false);
 
         Song song = getIntent().getParcelableExtra("song");
+        currentPlaylist = getIntent().getParcelableExtra("playlist");
         currentSong = song;
         if(song != null){
             Intent intent = new Intent(this, MusicService.class);
@@ -184,6 +208,18 @@ public class PlayActivity extends ActionBarActivity {
             else if(!musicService.getPlayer().isPlaying()){
                 musicService.play();
             }
+        }
+    }
+
+    public void playNextSong(View view){
+        if(musicService != null){
+            musicService.playNext();
+        }
+    }
+
+    public void playPreviousSong(View view){
+        if(musicService != null){
+            musicService.playNext();
         }
     }
 

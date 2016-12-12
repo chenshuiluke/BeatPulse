@@ -47,6 +47,7 @@ public class AllSongsActivity extends AppCompatActivity {
         songList.addAll(songs);
 
 
+
         AllSongAdapter songAdapter = new AllSongAdapter(songList, this);
         recyclerView.setAdapter(songAdapter);
 

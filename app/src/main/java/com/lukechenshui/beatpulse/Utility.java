@@ -69,6 +69,49 @@ public class Utility {
         File[] files = location.listFiles(new FileFilter() {
             @Override
             public boolean accept(File file) {
+                return (file.getName().endsWith(".mp3")
+                        || file.getName().endsWith(".flac") || file.getName().endsWith(".ogg")
+                        || file.getName().endsWith(".wav"));
+            }
+        });
+
+        if(files != null && files.length > 0){
+            fileList.addAll(Arrays.asList(files));
+        }
+        if(!fileList.isEmpty()){
+            Collections.sort(fileList);
+        }
+        return fileList;
+    }
+
+    public static ArrayList<File> getListOfAudioFilesInDirectoryExcept(Context context, final File exceptFile){
+        ArrayList<File> fileList = new ArrayList<>();
+        File location = new File(Config.getLastFolderLocation(context));
+        File[] files = location.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                return !file.getAbsolutePath().equals(exceptFile.getAbsolutePath())
+                        && (file.getName().endsWith(".mp3")
+                        || file.getName().endsWith(".flac") || file.getName().endsWith(".ogg")
+                        || file.getName().endsWith(".wav"));
+            }
+        });
+
+        if(files != null && files.length > 0){
+            fileList.addAll(Arrays.asList(files));
+        }
+        if(!fileList.isEmpty()){
+            Collections.sort(fileList);
+        }
+        return fileList;
+    }
+
+    public static ArrayList<File> getListOfFoldersAndAudioFilesInDirectory(Context context){
+        ArrayList<File> fileList = new ArrayList<>();
+        File location = new File(Config.getLastFolderLocation(context));
+        File[] files = location.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File file) {
                 return (file.isDirectory() || file.getName().endsWith(".mp3")
                         || file.getName().endsWith(".flac") || file.getName().endsWith(".ogg")
                         || file.getName().endsWith(".wav"));

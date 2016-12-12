@@ -7,17 +7,28 @@ import java.util.ArrayList;
 
 import io.realm.RealmList;
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by luke on 12/10/16.
  */
 public class Playlist extends RealmObject implements Parcelable {
+
     private RealmList<Song> songs;
+    @PrimaryKey
     private String name;
     private int lastPlayedPosition = 0;
 
-
-
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Playlist){
+            Playlist playlistObj = (Playlist)obj;
+            return songs.equals(playlistObj.songs);
+        }
+        else{
+            return false;
+        }
+    }
 
     public Playlist() {
 
@@ -29,7 +40,12 @@ public class Playlist extends RealmObject implements Parcelable {
     }
 
     public Playlist(ArrayList<Song> songs, String name) {
-        this.songs.clear();
+        if(this.songs != null){
+            this.songs.clear();
+        }
+        else{
+            this.songs = new RealmList<Song>();
+        }
         this.songs.addAll(songs);
         this.name = name;
     }
@@ -59,7 +75,14 @@ public class Playlist extends RealmObject implements Parcelable {
     }
 
     protected Playlist(Parcel in) {
-        songs = (RealmList) in.readValue(RealmList.class.getClassLoader());
+        ArrayList<Song> songList = (ArrayList<Song>) in.readValue(RealmList.class.getClassLoader());
+        if(songs == null){
+            songs = new RealmList<>();
+        }
+        else{
+            songs.clear();
+        }
+        songs.addAll(songList);
         name = in.readString();
         lastPlayedPosition = in.readInt();
     }

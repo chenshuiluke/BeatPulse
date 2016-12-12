@@ -24,6 +24,7 @@ import io.realm.RealmResults;
 
 public class MainActivity extends ActionBarActivity {
     private static final String TAG = "MainActivity";
+    private static boolean firstRun = true;
     private final int REQUEST_PERMISSIONS = 15;
 
     @Override
@@ -64,6 +65,19 @@ public class MainActivity extends ActionBarActivity {
         drawer.setSelection(Config.HOME_DRAWER_ITEM_POS+1, false);
         for(Song song : results){
             Log.d(TAG, "Song in db: " + song.getName());
+        }
+
+        if(firstRun){
+            firstRun = false;
+            if(Config.getLastSong(getApplicationContext()) != null){
+                drawer.setSelection(Config.NOW_PLAYING_DRAWER_ITEM_POS+1, true);
+            }
+            else if(results.size() > 0){
+                drawer.setSelection(Config.ALL_SONGS_DRAWER_ITEM_POS+1, true);
+            }
+            else{
+                drawer.setSelection(Config.BROWSE_DRAWER_ITEM_POS+1, true);
+            }
         }
 
         startService(new Intent(this, MusicService.class));

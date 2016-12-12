@@ -14,6 +14,7 @@ import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.DrawerInitializer;
 import com.lukechenshui.beatpulse.R;
 import com.lukechenshui.beatpulse.Utility;
+import com.lukechenshui.beatpulse.models.Playlist;
 import com.lukechenshui.beatpulse.models.Song;
 
 import java.io.File;
@@ -71,7 +72,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileHolder> {
                         if (currentFile.isDirectory()) {
                             Config.setLastFolderLocation(currentFile.getAbsolutePath(),
                                     context);
-                            ArrayList<File> fileList = Utility.getListOfAudioFilesInDirectory(context);
+                            ArrayList<File> fileList = Utility.getListOfFoldersAndAudioFilesInDirectory(context);
                             files.clear();
                             files = fileList;
                             notifyDataSetChanged();
@@ -81,12 +82,26 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileHolder> {
 
                             Song song = new Song(currentFile.getName(), currentFile);
 
+                            ArrayList<File> songsInSameDirectory = Utility.getListOfAudioFilesInDirectory(context);
+
+                            ArrayList<Song> songs = new ArrayList<Song>();
+
+                            for(File currSong : songsInSameDirectory){
+                                Song newSong = new Song(currSong.getName(), currSong);
+                                realm.copyToRealmOrUpdate(newSong);
+                                songs.add(newSong);
+                            }
+                            File parentFile = currentFile.getParentFile();
+                            String playlistName = parentFile != null ? parentFile.getName() : "Unknown Playlist";
+                            Playlist playlist = new Playlist(songs, playlistName);
                             realm.copyToRealmOrUpdate(song);
+                            realm.copyToRealmOrUpdate(playlist);
 
                             Intent intent = new Intent(context, DrawerInitializer.getDrawerActivities().get(Config.NOW_PLAYING_DRAWER_ITEM_POS));
 
                             Bundle bundle = new Bundle();
                             bundle.putParcelable("song", song);
+                            bundle.putParcelable("playlist", playlist);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             intent.putExtras(bundle);
                             realm.commitTransaction();

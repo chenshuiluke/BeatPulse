@@ -14,6 +14,7 @@ import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.DrawerInitializer;
 import com.lukechenshui.beatpulse.R;
 import com.lukechenshui.beatpulse.Utility;
+import com.lukechenshui.beatpulse.models.Playlist;
 import com.lukechenshui.beatpulse.models.Song;
 
 import java.io.File;
@@ -70,8 +71,17 @@ public class AllSongAdapter extends RecyclerView.Adapter<AllSongAdapter.SongHold
                     if (currentSong != null) {
                         Intent intent = new Intent(context, DrawerInitializer.getDrawerActivities().get(Config.NOW_PLAYING_DRAWER_ITEM_POS));
 
+
+                        Realm realm = Realm.getDefaultInstance();
+                        realm.beginTransaction();
+                        Playlist playlist = new Playlist(songs, "All Songs");
+
+                        realm.copyToRealmOrUpdate(playlist);
+
+                        realm.commitTransaction();
                         Bundle bundle = new Bundle();
                         bundle.putParcelable("song", currentSong);
+                        bundle.putParcelable("playlust", playlist);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         intent.putExtras(bundle);
                         context.startActivity(intent);
