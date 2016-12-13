@@ -9,14 +9,34 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.ExoPlaybackException;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.LoadControl;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
+import com.google.android.exoplayer2.extractor.ExtractorsFactory;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.trackselection.AdaptiveVideoTrackSelection;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelector;
+import com.google.android.exoplayer2.upstream.BandwidthMeter;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
 import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.R;
 import com.lukechenshui.beatpulse.Utility;
@@ -42,7 +62,12 @@ public class MusicService extends Service {
     MusicBinder binder = new MusicBinder();
     Song song;
     Playlist playlist;
-    MediaPlayer player;
+
+
+
+
+    SimpleExoPlayer player;
+
     boolean showNotification;
     ExecutorService executor = Executors.newFixedThreadPool(1);
     public MusicService() {
@@ -61,9 +86,8 @@ public class MusicService extends Service {
         Intent broadcastIntent = new Intent();
         broadcastIntent.setAction("MEDIA_PLAYER_PAUSED");
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(broadcastIntent);
-
-        if(player.isPlaying()){
-            player.pause();
+        if(player.getPlaybackState() == ExoPlayer.STATE_READY){
+            player.setPlayWhenReady(false);
         }
         if(showNotification){
             showNotification();
@@ -73,17 +97,47 @@ public class MusicService extends Service {
 
     public void play(){
         try{
-            player.prepare();
+            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(getApplicationContext(),
+                    Util.getUserAgent(getApplicationContext(), "BeatPulse"));
+// Produces Extractor instances for parsing the media data.
+            ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+// This is the MediaSource representing the media to be played.
+            MediaSource songSource = new ExtractorMediaSource(song.getFileUri(),
+                    dataSourceFactory, extractorsFactory, null, null);
+            player.prepare(songSource);
+            player.setPlayWhenReady(true);
 
         }
         catch (Exception exc){
-            //Catches the exception raised when preparing the same MediaPlayer multiple times.
+            //Catches the exception raised when preparing the same FFmpegMediaPlayer multiple times.
+            Log.d(TAG, "Exception occurred while starting to play " + song.getName(), exc);
         }
-        player.start();
-        player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+        player.addListener(new ExoPlayer.EventListener() {
             @Override
-            public void onCompletion(MediaPlayer mediaPlayer) {
-                playNext();
+            public void onLoadingChanged(boolean isLoading) {
+
+            }
+
+            @Override
+            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                if(playbackState == ExoPlayer.STATE_ENDED){
+                    playNext();
+                }
+            }
+
+            @Override
+            public void onTimelineChanged(Timeline timeline, Object manifest) {
+
+            }
+
+            @Override
+            public void onPlayerError(ExoPlaybackException error) {
+
+            }
+
+            @Override
+            public void onPositionDiscontinuity() {
+
             }
         });
         Realm realm = Realm.getDefaultInstance();
@@ -108,12 +162,19 @@ public class MusicService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         //onBind is only called when the first client connects. All other bind attempts just return the same binder object
+
         return binder;
     }
 
     public void init(final Song song, Playlist newPlaylist){
+        Handler handler = new Handler();
+        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+        TrackSelection.Factory trackSelection = new AdaptiveVideoTrackSelection.Factory(bandwidthMeter);
+        TrackSelector trackSelector = new DefaultTrackSelector(handler, trackSelection);
+        LoadControl loadControl = new DefaultLoadControl();
 
-
+        resetPlayer();
+        player = ExoPlayerFactory.newSimpleInstance(getApplicationContext(), trackSelector, loadControl);
         if(song != null){
             this.song = song;
             this.playlist = newPlaylist;
@@ -158,7 +219,6 @@ public class MusicService extends Service {
     private void resetPlayer(){
         if(player != null){
             player.stop();
-            player.reset();
         }
     }
 
@@ -206,26 +266,15 @@ public class MusicService extends Service {
     }
 
     private void playSong(Song songToPlay){
-        try{
-            resetPlayer();
-            if(player == null){
-                player = new MediaPlayer();
-            }
+        resetPlayer();
 
-            player.setAudioStreamType(AudioManager.STREAM_MUSIC);
-
-            player.setDataSource(getApplicationContext(), songToPlay.getFileUri());
-
-            Config.setLastSong(songToPlay, getApplicationContext());
-            if(isShowNotification()){
-                showNotification();
-            }
-            song = songToPlay;
-            play();
+        Config.setLastSong(songToPlay, getApplicationContext());
+        if(isShowNotification()){
+            showNotification();
         }
-        catch (IOException|IllegalStateException exc){
-            Log.d(TAG, "An exception occurred while loading song " + songToPlay.getFileUri(), exc);
-        }
+        song = songToPlay;
+        play();
+
     }
 
     @Override
@@ -289,7 +338,7 @@ public class MusicService extends Service {
         int playButtonId;
         String playButtonString;
 
-        if(player.isPlaying()){
+        if(player.getPlaybackState() != ExoPlayer.STATE_IDLE){
             playButtonId = R.drawable.ic_pause_white_24dp;
             playButtonString = "Pause";
             playIntent.setAction(Config.ACTION.PAUSE_ACTION);
@@ -335,11 +384,11 @@ public class MusicService extends Service {
         super.onCreate();
     }
 
-    public MediaPlayer getPlayer() {
+    public SimpleExoPlayer getPlayer() {
         return player;
     }
 
-    public void setPlayer(MediaPlayer player) {
+    public void setPlayer(SimpleExoPlayer player) {
         this.player = player;
     }
 

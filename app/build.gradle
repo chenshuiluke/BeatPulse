@@ -31,5 +31,8 @@ dependencies {
     compile 'com.google.guava:guava:20.0'
     compile 'com.android.support:support-v4:25.0.1'
     compile 'com.github.markushi:circlebutton:1.1'
+    compile 'com.google.android.exoplayer:exoplayer:r2.0.4'
+
+
     testCompile 'junit:junit:4.12'
 }

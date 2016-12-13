@@ -59,12 +59,4 @@
             android:onClick="playNextSong"
             />
     </LinearLayout>
-
-    <com.lukechenshui.beatpulse.visualizer.VisualizerView
-        android:id="@+id/visualizerView"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_above="@+id/buttonBar"
-        android:layout_below="@+id/marqueeTextView">
-    </com.lukechenshui.beatpulse.visualizer.VisualizerView>
 </RelativeLayout>

@@ -21,17 +21,13 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
+import com.google.android.exoplayer2.ExoPlayer;
 import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.DrawerInitializer;
 import com.lukechenshui.beatpulse.R;
 import com.lukechenshui.beatpulse.models.Playlist;
 import com.lukechenshui.beatpulse.models.Song;
 import com.lukechenshui.beatpulse.services.MusicService;
-import com.lukechenshui.beatpulse.visualizer.VisualizerView;
-import com.lukechenshui.beatpulse.visualizer.renderer.BarGraphRenderer;
-import com.lukechenshui.beatpulse.visualizer.renderer.CircleBarRenderer;
-import com.lukechenshui.beatpulse.visualizer.renderer.CircleRenderer;
-import com.lukechenshui.beatpulse.visualizer.renderer.LineRenderer;
 import com.mikepenz.materialdrawer.Drawer;
 
 import at.markushi.ui.CircleButton;
@@ -42,7 +38,6 @@ public class PlayActivity extends ActionBarActivity {
     private CircleButton playOrPauseButton;
     private CircleButton nextSongButton;
     private MusicService musicService;
-    private VisualizerView visualizerView;
     private TextView marqueeTextView;
 
 
@@ -88,9 +83,9 @@ public class PlayActivity extends ActionBarActivity {
                 marqueeTextView.startAnimation(marquee);
             }
             try{
-                visualizerView.link(musicService.getPlayer());
+                //visualizerView.link(musicService.getPlayer());
             }
-            catch (IllegalStateException exc){
+            catch (RuntimeException exc){
                 Log.d(TAG, "Exception when starting visualization", exc);
             }
 
@@ -108,8 +103,6 @@ public class PlayActivity extends ActionBarActivity {
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
             bound = false;
-            visualizerView.release();
-            visualizerView.clearRenderers();
             Log.d(TAG, "Disconnected from music service");
         }
     };
@@ -125,13 +118,6 @@ public class PlayActivity extends ActionBarActivity {
             unbindService(connection);
             bound=false;
         }
-        try{
-            visualizerView.release();
-            visualizerView.clearRenderers();
-        }
-        catch (NullPointerException exc){
-
-        }
 
     }
 
@@ -145,7 +131,6 @@ public class PlayActivity extends ActionBarActivity {
     }
 
     private void init(){
-        visualizerView = (VisualizerView) findViewById(R.id.visualizerView);
         LocalBroadcastManager bManager = LocalBroadcastManager.getInstance(getApplicationContext());
 
         IntentFilter filter = new IntentFilter();
@@ -206,10 +191,10 @@ public class PlayActivity extends ActionBarActivity {
 
     public void startOrPauseMediaPlayer(View view){
         if(musicService != null){
-            if(musicService.getPlayer().isPlaying()){
+            if(musicService.getPlayer().getPlaybackState() != ExoPlayer.STATE_IDLE){
                 musicService.pause();
             }
-            else if(!musicService.getPlayer().isPlaying()){
+            else if(musicService.getPlayer().getPlaybackState() == ExoPlayer.STATE_IDLE){
                 musicService.play();
             }
         }
@@ -233,8 +218,6 @@ public class PlayActivity extends ActionBarActivity {
         paint.setStrokeWidth(3f);
         paint.setAntiAlias(true);
         paint.setColor(Color.argb(255, 222, 92, 143));
-        CircleRenderer circleRenderer = new CircleRenderer(paint, true);
-        visualizerView.addRenderer(circleRenderer);
     }
 
     private void addCircleBarRenderer()
@@ -244,8 +227,6 @@ public class PlayActivity extends ActionBarActivity {
         paint.setAntiAlias(true);
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.LIGHTEN));
         paint.setColor(Color.argb(255, 222, 92, 143));
-        CircleBarRenderer circleBarRenderer = new CircleBarRenderer(paint, 32, true);
-        visualizerView.addRenderer(circleBarRenderer);
     }
 
     private void addBarGraphRenderers()
@@ -254,15 +235,11 @@ public class PlayActivity extends ActionBarActivity {
         paint.setStrokeWidth(50f);
         paint.setAntiAlias(true);
         paint.setColor(Color.argb(200, 56, 138, 252));
-        BarGraphRenderer barGraphRendererBottom = new BarGraphRenderer(16, paint, false);
-        visualizerView.addRenderer(barGraphRendererBottom);
 
         Paint paint2 = new Paint();
         paint2.setStrokeWidth(12f);
         paint2.setAntiAlias(true);
         paint2.setColor(Color.argb(200, 181, 111, 233));
-        BarGraphRenderer barGraphRendererTop = new BarGraphRenderer(4, paint2, true);
-        visualizerView.addRenderer(barGraphRendererTop);
     }
 
 }
