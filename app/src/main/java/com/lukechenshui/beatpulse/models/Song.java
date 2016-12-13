@@ -17,7 +17,7 @@ import io.realm.annotations.PrimaryKey;
  * Created by luke on 12/10/16.
  */
 
-public class Song extends RealmObject implements Parcelable {
+public class Song extends RealmObject implements Parcelable, Comparable<Song> {
     @PrimaryKey
     String hash;
     String name;
@@ -103,5 +103,10 @@ public class Song extends RealmObject implements Parcelable {
         else{
             return false;
         }
+    }
+
+    @Override
+    public int compareTo(Song song) {
+        return name.compareTo(song.name);
     }
 }

@@ -47,6 +47,7 @@ import com.lukechenshui.beatpulse.models.Song;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -180,6 +181,7 @@ public class MusicService extends Service {
             this.playlist = newPlaylist;
 
             playSong(song);
+
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -187,14 +189,16 @@ public class MusicService extends Service {
                         ArrayList<Song> songs = new ArrayList<Song>();
                         File parentFile = song.getFile().getParentFile();
                         String playlistName = parentFile != null ? parentFile.getName() : "Unknown Playlist";
-                        playlist = new Playlist(songs, playlistName);
+
                         ArrayList<File> songsInSameDirectory = Utility.getListOfAudioFilesInDirectory(getApplicationContext());
 
                         for(File currSong : songsInSameDirectory){
                             Song newSong = new Song(currSong.getName(), currSong);
-                            playlist.addSong(newSong);
+                            songs.add(newSong);
                         }
 
+                        Collections.sort(songs);
+                        playlist = new Playlist(songs, playlistName);
                     }
 
                     if(playlist != null){
@@ -211,8 +215,7 @@ public class MusicService extends Service {
                     realm.commitTransaction();
                 }
             });
-            executor.submit(thread);
-
+            executor.execute(thread);
         }
     }
 
@@ -223,44 +226,65 @@ public class MusicService extends Service {
     }
 
     public void playNext(){
-        int pos = playlist.getLastPlayedPosition();
-        RealmList<Song> playlistSongs = playlist.getSongs();
-        Song nextSong;
-        if(pos+1 <= playlistSongs.size()-1){
-            pos++;
-            playlist.setLastPlayedPosition(pos);
-            nextSong = playlistSongs.get(pos);
-        }
-        else{
-            if(playlistSongs.size() > 0){
-                nextSong = playlistSongs.first();
-                playlist.setLastPlayedPosition(0);
+
+        Song nextSong = null;
+        if(playlist != null){
+            int pos = playlist.getLastPlayedPosition();
+            RealmList<Song> playlistSongs = playlist.getSongs();
+
+            if(playlistSongs != null) {
+                if (pos + 1 <= playlistSongs.size() - 1) {
+                    pos++;
+                    playlist.setLastPlayedPosition(pos);
+                    nextSong = playlistSongs.get(pos);
+                } else {
+                    if (playlistSongs.size() > 0) {
+                        nextSong = playlistSongs.first();
+                        playlist.setLastPlayedPosition(0);
+                    } else {
+                        nextSong = song;
+                    }
+                }
             }
             else{
                 nextSong = song;
             }
         }
+        else{
+            nextSong = song;
+        }
+
         playSong(nextSong);
     }
 
     public void playPrevious(){
-        int pos = playlist.getLastPlayedPosition();
-        RealmList<Song> playlistSongs = playlist.getSongs();
-        Song nextSong;
-        if(pos-1 >= 0){
-            pos--;
-            playlist.setLastPlayedPosition(pos);
-            nextSong = playlistSongs.get(pos);
-        }
-        else{
-            playlist.setLastPlayedPosition(playlistSongs.size()-1);
-            if(playlistSongs.size() > 0){
-                nextSong = playlistSongs.last();
+        Song nextSong = null;
+        if(playlist != null){
+            int pos = playlist.getLastPlayedPosition();
+            RealmList<Song> playlistSongs = playlist.getSongs();
+            if(playlistSongs != null){
+                if(pos-1 >= 0){
+                    pos--;
+                    playlist.setLastPlayedPosition(pos);
+                    nextSong = playlistSongs.get(pos);
+                }
+                else{
+                    playlist.setLastPlayedPosition(playlistSongs.size()-1);
+                    if(playlistSongs.size() > 0){
+                        nextSong = playlistSongs.last();
+                    }
+                    else{
+                        nextSong = song;
+                    }
+
+                }
             }
             else{
                 nextSong = song;
             }
-
+        }
+        else{
+            nextSong = song;
         }
         playSong(nextSong);
     }
