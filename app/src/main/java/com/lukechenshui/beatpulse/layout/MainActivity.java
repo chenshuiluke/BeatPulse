@@ -3,7 +3,6 @@ package com.lukechenshui.beatpulse.layout;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
@@ -11,15 +10,12 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
 import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.DrawerInitializer;
 import com.lukechenshui.beatpulse.R;
-import com.lukechenshui.beatpulse.SharedData;
 import com.lukechenshui.beatpulse.Utility;
-import com.lukechenshui.beatpulse.models.Playlist;
 import com.lukechenshui.beatpulse.models.Song;
 import com.lukechenshui.beatpulse.services.MusicService;
 import com.mikepenz.materialdrawer.Drawer;
@@ -28,7 +24,6 @@ import java.io.File;
 import java.util.ArrayList;
 
 import io.realm.Realm;
-import io.realm.RealmQuery;
 import io.realm.RealmResults;
 
 public class MainActivity extends ActionBarActivity {
@@ -93,9 +88,10 @@ public class MainActivity extends ActionBarActivity {
         Realm realm = Realm.getDefaultInstance();
         RealmResults<Song> results = realm.where(Song.class).findAll();
         drawer.setSelection(Config.HOME_DRAWER_ITEM_POS+1, false);
-        scanForMusic();
+
 
         if(firstRun){
+            scanForMusic();
             firstRun = false;
             if(Config.getLastSong(getApplicationContext()) != null){
                 drawer.setSelection(Config.NOW_PLAYING_DRAWER_ITEM_POS+1, true);

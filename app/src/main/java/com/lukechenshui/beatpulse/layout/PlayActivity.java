@@ -6,10 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
@@ -21,7 +17,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
-import com.google.android.exoplayer2.ExoPlayer;
 import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.DrawerInitializer;
 import com.lukechenshui.beatpulse.R;
@@ -35,34 +30,16 @@ import pl.bclogic.pulsator4droid.library.PulsatorLayout;
 
 public class PlayActivity extends ActionBarActivity {
     private final String TAG = "PlayActivity";
+    PulsatorLayout pulsator;
     private CircleButton previousSongButton;
     private CircleButton playOrPauseButton;
     private CircleButton nextSongButton;
     private MusicService musicService;
     private TextView marqueeTextView;
-
-    PulsatorLayout pulsator;
-
     private Song currentSong;
     private Playlist currentPlaylist;
 
     private boolean bound;
-    private BroadcastReceiver receiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if(intent.getAction().equals("MEDIA_PLAYER_PAUSED")){
-                playOrPauseButton.setImageResource(R.drawable.ic_play_arrow_white_24dp);
-                marqueeTextView.setText(musicService.getSong().getName());
-                pulsator.setDuration(7000);
-            }
-            else if(intent.getAction().equals("MEDIA_PLAYER_STARTED")){
-                playOrPauseButton.setImageResource(R.drawable.ic_pause_white_24dp);
-                marqueeTextView.setText(musicService.getSong().getName());
-                pulsator.setDuration(2000);
-            }
-            Log.d(TAG, "Received broadcast: " + intent.getAction());
-        }
-    };
     ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
@@ -93,8 +70,6 @@ public class PlayActivity extends ActionBarActivity {
             }
 
             musicService.setShowNotification(false);
-            addBarGraphRenderers();
-            addCircleBarRenderer();
 
             marqueeTextView.setText(currentSong.getName());
             Animation marquee = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.marquee);
@@ -109,6 +84,21 @@ public class PlayActivity extends ActionBarActivity {
             Log.d(TAG, "Disconnected from music service");
         }
     };
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals("MEDIA_PLAYER_PAUSED")) {
+                playOrPauseButton.setImageResource(R.drawable.ic_play_arrow_white_24dp);
+                marqueeTextView.setText(musicService.getSong().getName());
+                pulsator.setDuration(7000);
+            } else if (intent.getAction().equals("MEDIA_PLAYER_STARTED")) {
+                playOrPauseButton.setImageResource(R.drawable.ic_pause_white_24dp);
+                marqueeTextView.setText(musicService.getSong().getName());
+                pulsator.setDuration(2000);
+            }
+            Log.d(TAG, "Received broadcast: " + intent.getAction());
+        }
+    };
 
     @Override
     protected void onStop() {
@@ -116,7 +106,6 @@ public class PlayActivity extends ActionBarActivity {
         if(musicService != null){
             musicService.setShowNotification(true);
         }
-
         if(bound){
             unbindService(connection);
             bound=false;
@@ -130,7 +119,6 @@ public class PlayActivity extends ActionBarActivity {
         if(musicService != null){
             musicService.setShowNotification(true);
         }
-
     }
 
     private void init(){
@@ -217,34 +205,5 @@ public class PlayActivity extends ActionBarActivity {
         }
     }
 
-    private void addCircleRenderer()
-    {
-        Paint paint = new Paint();
-        paint.setStrokeWidth(3f);
-        paint.setAntiAlias(true);
-        paint.setColor(Color.argb(255, 222, 92, 143));
-    }
-
-    private void addCircleBarRenderer()
-    {
-        Paint paint = new Paint();
-        paint.setStrokeWidth(8f);
-        paint.setAntiAlias(true);
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.LIGHTEN));
-        paint.setColor(Color.argb(255, 222, 92, 143));
-    }
-
-    private void addBarGraphRenderers()
-    {
-        Paint paint = new Paint();
-        paint.setStrokeWidth(50f);
-        paint.setAntiAlias(true);
-        paint.setColor(Color.argb(200, 56, 138, 252));
-
-        Paint paint2 = new Paint();
-        paint2.setStrokeWidth(12f);
-        paint2.setAntiAlias(true);
-        paint2.setColor(Color.argb(200, 181, 111, 233));
-    }
 
 }

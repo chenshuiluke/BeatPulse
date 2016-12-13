@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -40,19 +39,13 @@ import com.google.android.exoplayer2.util.Util;
 import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.R;
 import com.lukechenshui.beatpulse.SharedData;
-import com.lukechenshui.beatpulse.Utility;
 import com.lukechenshui.beatpulse.layout.PlayActivity;
 import com.lukechenshui.beatpulse.models.Playlist;
 import com.lukechenshui.beatpulse.models.Song;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import io.realm.Realm;
 import io.realm.RealmList;
@@ -190,6 +183,14 @@ public class MusicService extends Service {
             playlist = newPlaylist;
             loadPlaylist();
             playSong(song);
+        }
+    }
+
+    public boolean isPaused() {
+        if (player != null) {
+            return !player.getPlayWhenReady();
+        } else {
+            return true;
         }
     }
 
