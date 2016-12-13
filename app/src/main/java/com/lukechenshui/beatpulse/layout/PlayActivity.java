@@ -31,6 +31,7 @@ import com.lukechenshui.beatpulse.services.MusicService;
 import com.mikepenz.materialdrawer.Drawer;
 
 import at.markushi.ui.CircleButton;
+import pl.bclogic.pulsator4droid.library.PulsatorLayout;
 
 public class PlayActivity extends ActionBarActivity {
     private final String TAG = "PlayActivity";
@@ -40,6 +41,7 @@ public class PlayActivity extends ActionBarActivity {
     private MusicService musicService;
     private TextView marqueeTextView;
 
+    PulsatorLayout pulsator;
 
     private Song currentSong;
     private Playlist currentPlaylist;
@@ -51,10 +53,12 @@ public class PlayActivity extends ActionBarActivity {
             if(intent.getAction().equals("MEDIA_PLAYER_PAUSED")){
                 playOrPauseButton.setImageResource(R.drawable.ic_play_arrow_white_24dp);
                 marqueeTextView.setText(musicService.getSong().getName());
+                pulsator.setDuration(7000);
             }
             else if(intent.getAction().equals("MEDIA_PLAYER_STARTED")){
                 playOrPauseButton.setImageResource(R.drawable.ic_pause_white_24dp);
                 marqueeTextView.setText(musicService.getSong().getName());
+                pulsator.setDuration(2000);
             }
             Log.d(TAG, "Received broadcast: " + intent.getAction());
         }
@@ -168,6 +172,8 @@ public class PlayActivity extends ActionBarActivity {
                 bindService(intent, connection, BIND_AUTO_CREATE);
             }
         }
+        pulsator = (PulsatorLayout) findViewById(R.id.pulsator);
+        pulsator.start();
     }
 
     @Override
