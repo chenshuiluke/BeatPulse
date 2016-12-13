@@ -63,7 +63,7 @@ public class MusicService extends Service {
     MusicBinder binder = new MusicBinder();
     Song song;
     Playlist playlist;
-
+    Long pausePos = null;
 
 
 
@@ -88,6 +88,7 @@ public class MusicService extends Service {
         broadcastIntent.setAction("MEDIA_PLAYER_PAUSED");
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(broadcastIntent);
         if(player.getPlaybackState() == ExoPlayer.STATE_READY){
+            pausePos = player.getCurrentPosition();
             player.setPlayWhenReady(false);
         }
         if(showNotification){
@@ -106,7 +107,12 @@ public class MusicService extends Service {
             MediaSource songSource = new ExtractorMediaSource(song.getFileUri(),
                     dataSourceFactory, extractorsFactory, null, null);
             player.prepare(songSource);
+
             player.setPlayWhenReady(true);
+
+            if(pausePos != null){
+                player.seekTo(pausePos);
+            }
 
         }
         catch (Exception exc){
@@ -168,6 +174,7 @@ public class MusicService extends Service {
     }
 
     public void init(final Song song, Playlist newPlaylist){
+
         Handler handler = new Handler();
         BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         TrackSelection.Factory trackSelection = new AdaptiveVideoTrackSelection.Factory(bandwidthMeter);
@@ -221,6 +228,7 @@ public class MusicService extends Service {
 
     private void resetPlayer(){
         if(player != null){
+            pausePos = null;
             player.stop();
         }
     }
@@ -362,7 +370,7 @@ public class MusicService extends Service {
         int playButtonId;
         String playButtonString;
 
-        if(player.getPlaybackState() != ExoPlayer.STATE_IDLE){
+        if(player.getPlayWhenReady()){
             playButtonId = R.drawable.ic_pause_white_24dp;
             playButtonString = "Pause";
             playIntent.setAction(Config.ACTION.PAUSE_ACTION);
