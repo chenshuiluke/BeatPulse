@@ -119,34 +119,7 @@ public class MusicService extends Service {
             //Catches the exception raised when preparing the same FFmpegMediaPlayer multiple times.
             Log.d(TAG, "Exception occurred while starting to play " + song.getName(), exc);
         }
-        player.addListener(new ExoPlayer.EventListener() {
-            @Override
-            public void onLoadingChanged(boolean isLoading) {
 
-            }
-
-            @Override
-            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                if(playbackState == ExoPlayer.STATE_ENDED){
-                    playNext();
-                }
-            }
-
-            @Override
-            public void onTimelineChanged(Timeline timeline, Object manifest) {
-
-            }
-
-            @Override
-            public void onPlayerError(ExoPlaybackException error) {
-
-            }
-
-            @Override
-            public void onPositionDiscontinuity() {
-
-            }
-        });
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
         realm.copyToRealmOrUpdate(song);
@@ -183,6 +156,34 @@ public class MusicService extends Service {
 
         resetPlayer();
         player = ExoPlayerFactory.newSimpleInstance(getApplicationContext(), trackSelector, loadControl);
+        player.addListener(new ExoPlayer.EventListener() {
+            @Override
+            public void onLoadingChanged(boolean isLoading) {
+
+            }
+
+            @Override
+            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                if(playbackState == ExoPlayer.STATE_ENDED){
+                    playNext();
+                }
+            }
+
+            @Override
+            public void onTimelineChanged(Timeline timeline, Object manifest) {
+
+            }
+
+            @Override
+            public void onPlayerError(ExoPlaybackException error) {
+
+            }
+
+            @Override
+            public void onPositionDiscontinuity() {
+
+            }
+        });
         if(song != null){
             this.song = song;
             this.playlist = newPlaylist;
