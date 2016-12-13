@@ -39,6 +39,7 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.R;
+import com.lukechenshui.beatpulse.SharedData;
 import com.lukechenshui.beatpulse.Utility;
 import com.lukechenshui.beatpulse.layout.PlayActivity;
 import com.lukechenshui.beatpulse.models.Playlist;
@@ -186,45 +187,29 @@ public class MusicService extends Service {
         });
         if(song != null){
             this.song = song;
-            this.playlist = newPlaylist;
-
+            playlist = newPlaylist;
+            loadPlaylist();
             playSong(song);
-
-            Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    if(playlist == null){
-                        ArrayList<Song> songs = new ArrayList<Song>();
-                        File parentFile = song.getFile().getParentFile();
-                        String playlistName = parentFile != null ? parentFile.getName() : "Unknown Playlist";
-
-                        ArrayList<File> songsInSameDirectory = Utility.getListOfAudioFilesInDirectory(getApplicationContext());
-
-                        for(File currSong : songsInSameDirectory){
-                            Song newSong = new Song(currSong.getName(), currSong);
-                            songs.add(newSong);
-                        }
-
-                        Collections.sort(songs);
-                        playlist = new Playlist(songs, playlistName);
-                    }
-
-                    if(playlist != null){
-                        RealmList<Song> playListSongs = playlist.getSongs();
-                        if(playListSongs.contains(song)){
-                            playlist.setLastPlayedPosition(playListSongs.lastIndexOf(song));
-                        }
-                    }
-
-                    Realm realm = Realm.getDefaultInstance();
-                    realm.beginTransaction();
-                    realm.copyToRealmOrUpdate(song);
-                    realm.copyToRealmOrUpdate(playlist);
-                    realm.commitTransaction();
-                }
-            });
-            executor.execute(thread);
         }
+    }
+
+    private void loadPlaylist(){
+        playlist = new Playlist();
+        File parentFile = song.getFile().getParentFile();
+        String playlistName = parentFile != null ? parentFile.getName() : "Unknown Playlist";
+
+        SharedData.init();
+        playlist.setSongs(SharedData.getSongsFromFolder(song));
+
+        RealmList<Song> playListSongs = playlist.getSongs();
+        if(playListSongs.contains(song)){
+            playlist.setLastPlayedPosition(playListSongs.lastIndexOf(song));
+        }
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        realm.copyToRealmOrUpdate(song);
+        realm.copyToRealmOrUpdate(playlist);
+        realm.commitTransaction();
     }
 
     private void resetPlayer(){
@@ -299,6 +284,7 @@ public class MusicService extends Service {
     }
 
     private void playSong(Song songToPlay){
+        //loadPlaylist();
         resetPlayer();
 
         Config.setLastSong(songToPlay, getApplicationContext());

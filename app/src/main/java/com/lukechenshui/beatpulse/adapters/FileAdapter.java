@@ -14,7 +14,6 @@ import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.DrawerInitializer;
 import com.lukechenshui.beatpulse.R;
 import com.lukechenshui.beatpulse.Utility;
-import com.lukechenshui.beatpulse.models.Playlist;
 import com.lukechenshui.beatpulse.models.Song;
 
 import java.io.File;
@@ -72,7 +71,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileHolder> {
                         if (currentFile.isDirectory()) {
                             Config.setLastFolderLocation(currentFile.getAbsolutePath(),
                                     context);
-                            ArrayList<File> fileList = Utility.getListOfFoldersAndAudioFilesInDirectory(context);
+                            ArrayList<File> fileList = Utility.getListOfFoldersAndAudioFilesInDirectoryWithParent(context);
                             files.clear();
                             files = fileList;
                             notifyDataSetChanged();

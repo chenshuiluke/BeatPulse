@@ -34,7 +34,7 @@ public class BrowsingActivity extends ActionBarActivity {
         layoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView = (RecyclerView) findViewById(R.id.browsingRecyclerView);
         recyclerView.setLayoutManager(layoutManager);
-        ArrayList<File> files = Utility.getListOfFoldersAndAudioFilesInDirectory(getApplicationContext());
+        ArrayList<File> files = Utility.getListOfFoldersAndAudioFilesInDirectoryWithParent(getApplicationContext());
 
         FileAdapter fileAdapter = new FileAdapter(files, this);
         recyclerView.setAdapter(fileAdapter);

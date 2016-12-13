@@ -18,11 +18,12 @@ import io.realm.annotations.PrimaryKey;
  */
 
 public class Song extends RealmObject implements Parcelable, Comparable<Song> {
-    @PrimaryKey
+
     String hash;
     String name;
+    @PrimaryKey
     String fileLocation;
-
+    String directory;
     public Song() {
 
     }
@@ -31,7 +32,11 @@ public class Song extends RealmObject implements Parcelable, Comparable<Song> {
         this.name = name;
         if(file.exists()){
             fileLocation = file.getAbsolutePath();
-            this.hash = Utility.getMD5OfFile(file);
+            File parent = file.getParentFile();
+            if(parent != null){
+                directory = parent.getAbsolutePath();
+            }
+            //this.hash = Utility.getMD5OfFile(file);
         }
         else{
             Log.d("Song", "File passed to Song constructor doesn't exist for song name " + name);
@@ -67,6 +72,7 @@ public class Song extends RealmObject implements Parcelable, Comparable<Song> {
         hash = in.readString();
         name = in.readString();
         fileLocation = in.readString();
+        directory = in.readString();
     }
 
     @Override
@@ -79,6 +85,7 @@ public class Song extends RealmObject implements Parcelable, Comparable<Song> {
         dest.writeString(hash);
         dest.writeString(name);
         dest.writeString(fileLocation);
+        dest.writeString(directory);
     }
 
     @SuppressWarnings("unused")
@@ -98,7 +105,7 @@ public class Song extends RealmObject implements Parcelable, Comparable<Song> {
     public boolean equals(Object obj) {
         if(obj instanceof Song){
             Song songObj = (Song)obj;
-            return hash.equals(songObj.hash);
+            return fileLocation.equals(songObj.fileLocation);
         }
         else{
             return false;
@@ -108,5 +115,9 @@ public class Song extends RealmObject implements Parcelable, Comparable<Song> {
     @Override
     public int compareTo(Song song) {
         return name.compareTo(song.name);
+    }
+
+    public String getDirectory() {
+        return directory;
     }
 }

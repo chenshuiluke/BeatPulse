@@ -106,7 +106,7 @@ public class Utility {
         return fileList;
     }
 
-    public static ArrayList<File> getListOfFoldersAndAudioFilesInDirectory(Context context){
+    public static ArrayList<File> getListOfFoldersAndAudioFilesInDirectoryWithParent(Context context){
         ArrayList<File> fileList = new ArrayList<>();
         File location = new File(Config.getLastFolderLocation(context));
         File[] files = location.listFiles(new FileFilter() {
@@ -126,6 +126,56 @@ public class Utility {
         if(files != null && files.length > 0){
             fileList.addAll(Arrays.asList(files));
         }
+        if(!fileList.isEmpty()){
+            Collections.sort(fileList);
+        }
+
+        return fileList;
+    }
+
+    public static ArrayList<File> getListOfFoldersAndAudioFilesInDirectory(Context context, File directory){
+        ArrayList<File> fileList = new ArrayList<>();
+        File location = directory;
+        File[] files = location.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                return (file.isDirectory() || file.getName().endsWith(".mp3")
+                        || file.getName().endsWith(".flac") || file.getName().endsWith(".ogg")
+                        || file.getName().endsWith(".wav"));
+            }
+        });
+        File parent = location.getParentFile();
+
+        if(files != null && files.length > 0){
+            fileList.addAll(Arrays.asList(files));
+        }
+        files = null;
+        ArrayList<File> secondaryList = new ArrayList<>();
+        ArrayList<File> unnecessaryFolders = new ArrayList<>();
+        for(File file : fileList){
+            if(file.isDirectory()){
+                secondaryList.addAll(getListOfFoldersAndAudioFilesInDirectory(context, file));
+                unnecessaryFolders.add(file);
+            }
+        }
+        for(int counter = 0; counter < secondaryList.size(); counter++){
+            File file = secondaryList.get(counter);
+            if(file.isDirectory()){
+                secondaryList.remove(counter);
+                counter--;
+                continue;
+            }
+        }
+
+        for(int counter = 0; counter < fileList.size(); counter++){
+            File file = fileList.get(counter);
+            if(file.isDirectory()){
+                fileList.remove(counter);
+                counter--;
+                continue;
+            }
+        }
+        fileList.addAll(secondaryList);
         if(!fileList.isEmpty()){
             Collections.sort(fileList);
         }
