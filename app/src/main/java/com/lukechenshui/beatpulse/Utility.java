@@ -71,7 +71,7 @@ public class Utility {
             public boolean accept(File file) {
                 return (file.getName().endsWith(".mp3")
                         || file.getName().endsWith(".flac") || file.getName().endsWith(".ogg")
-                        || file.getName().endsWith(".wav"));
+                        || file.getName().endsWith(".wav") || file.getName().endsWith(".m4a"));
             }
         });
 
@@ -91,9 +91,7 @@ public class Utility {
             @Override
             public boolean accept(File file) {
                 return !file.getAbsolutePath().equals(exceptFile.getAbsolutePath())
-                        && (file.getName().endsWith(".mp3")
-                        || file.getName().endsWith(".flac") || file.getName().endsWith(".ogg")
-                        || file.getName().endsWith(".wav"));
+                        &&  isMusicFileSupported(file);
             }
         });
 
@@ -112,9 +110,7 @@ public class Utility {
         File[] files = location.listFiles(new FileFilter() {
             @Override
             public boolean accept(File file) {
-                return (file.isDirectory() || file.getName().endsWith(".mp3")
-                        || file.getName().endsWith(".flac") || file.getName().endsWith(".ogg")
-                        || file.getName().endsWith(".wav"));
+                return (file.isDirectory()  || isMusicFileSupported(file));
             }
         });
         File parent = location.getParentFile();
@@ -135,13 +131,17 @@ public class Utility {
 
     public static ArrayList<File> getListOfFoldersAndAudioFilesInDirectory(Context context, File directory){
         ArrayList<File> fileList = new ArrayList<>();
+        try{
+            directory = directory.getCanonicalFile();
+        }
+        catch (IOException exc){
+            Log.d(TAG, "Exception occured while getting canonical file of " + directory.getAbsolutePath(), exc);
+        }
         File location = directory;
         File[] files = location.listFiles(new FileFilter() {
             @Override
             public boolean accept(File file) {
-                return (file.isDirectory() || file.getName().endsWith(".mp3")
-                        || file.getName().endsWith(".flac") || file.getName().endsWith(".ogg")
-                        || file.getName().endsWith(".wav"));
+                return (file.isDirectory() || isMusicFileSupported(file));
             }
         });
         File parent = location.getParentFile();
@@ -181,5 +181,11 @@ public class Utility {
         }
 
         return fileList;
+    }
+
+    public static boolean isMusicFileSupported(File file){
+        return (file.getName().endsWith(".mp3")
+                || file.getName().endsWith(".flac") || file.getName().endsWith(".ogg")
+                || file.getName().endsWith(".wav") || file.getName().endsWith(".m4a"));
     }
 }

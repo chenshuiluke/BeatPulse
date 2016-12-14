@@ -16,6 +16,7 @@ import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.DrawerInitializer;
 import com.lukechenshui.beatpulse.R;
 import com.lukechenshui.beatpulse.Utility;
+import com.lukechenshui.beatpulse.models.Playlist;
 import com.lukechenshui.beatpulse.models.Song;
 import com.lukechenshui.beatpulse.services.MusicService;
 import com.mikepenz.materialdrawer.Drawer;
@@ -63,10 +64,8 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.RECORD_AUDIO,}, REQUEST_PERMISSIONS);
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_PERMISSIONS);
         }
         else{
             init();
@@ -105,15 +104,42 @@ public class MainActivity extends ActionBarActivity {
         }
     }
     public void scanForMusic(){
-        ArrayList<File> fileList = Utility.getListOfFoldersAndAudioFilesInDirectory(getApplicationContext(),
-                Environment.getExternalStorageDirectory());
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
-        for(File file : fileList){
-            Log.d(TAG, "Found song: " + file);
-            Song song = new Song(file.getName(), file);
-            realm.copyToRealmOrUpdate(song);
+        realm.delete(Song.class);
+        realm.delete(Playlist.class);
+        String externalStorageString = System.getenv("EXTERNAL_STORAGE");
+        String secondaryStorageString = System.getenv("SECONDARY_STORAGE");
+        File externalStorage = null;
+        File secondaryStorage = null;
+        if(externalStorageString != null){
+            externalStorage = new File(externalStorageString);
+            ArrayList<File> fileList = Utility.getListOfFoldersAndAudioFilesInDirectory(getApplicationContext(),
+                    externalStorage);
+
+            for(File file : fileList){
+                Log.d(TAG, "Found song: " + file);
+                Song song = new Song(file.getName(), file);
+                realm.copyToRealmOrUpdate(song);
+            }
+            Log.d(TAG, "External Storage: " + externalStorage);
         }
+        if(secondaryStorageString != null){
+            secondaryStorage = new File(secondaryStorageString);
+            ArrayList<File> fileList = Utility.getListOfFoldersAndAudioFilesInDirectory(getApplicationContext(),
+                    secondaryStorage);
+
+            for(File file : fileList){
+                Log.d(TAG, "Found song: " + file);
+                Song song = new Song(file.getName(), file);
+                realm.copyToRealmOrUpdate(song);
+            }
+            Log.d(TAG, "Secondary Storage: " + secondaryStorage);
+        }
+
+
+
+
         realm.commitTransaction();
     }
 }

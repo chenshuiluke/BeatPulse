@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.DrawerInitializer;
 import com.lukechenshui.beatpulse.R;
+import com.lukechenshui.beatpulse.SharedData;
 import com.lukechenshui.beatpulse.Utility;
 import com.lukechenshui.beatpulse.models.Song;
 
@@ -90,6 +91,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileHolder> {
                             intent.putExtras(bundle);
                             realm.commitTransaction();
                             context.startActivity(intent);
+                            SharedData.setOrigin(context, "folder");
                             ((Activity)context).finish();
                         }
                     }

@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.DrawerInitializer;
 import com.lukechenshui.beatpulse.R;
+import com.lukechenshui.beatpulse.SharedData;
 import com.lukechenshui.beatpulse.Utility;
 import com.lukechenshui.beatpulse.models.Playlist;
 import com.lukechenshui.beatpulse.models.Song;
@@ -79,6 +80,7 @@ public class AllSongAdapter extends RecyclerView.Adapter<AllSongAdapter.SongHold
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         intent.putExtras(bundle);
                         context.startActivity(intent);
+                        SharedData.setOrigin(context, "all_songs");
                         ((Activity)context).finish();
                     }
                 }

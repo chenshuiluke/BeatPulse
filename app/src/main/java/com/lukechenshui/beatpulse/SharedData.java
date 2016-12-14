@@ -1,5 +1,7 @@
 package com.lukechenshui.beatpulse;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.lukechenshui.beatpulse.models.Playlist;
@@ -22,6 +24,7 @@ public class SharedData {
     private static Realm realm;
     private static RealmResults<Song> songs;
     private static RealmResults<Playlist> playlists;
+    private static String origin;
     public static void init(){
         realm = Realm.getDefaultInstance();
         songs = realm.where(Song.class).findAll();
@@ -44,5 +47,26 @@ public class SharedData {
             list.addAll(accompanyingSongs);
         }
         return list;
+    }
+
+    public static RealmList<Song> getAllSongs(){
+        RealmList<Song> list = new RealmList<>();
+        list.addAll(songs);
+        return list;
+    }
+
+    public static String getOrigin(Context context) {
+        SharedPreferences sharedPref = context.getSharedPreferences(
+                context.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        origin = sharedPref.getString("origin", null);
+        return origin;
+    }
+
+    public static void setOrigin(Context context, String origin) {
+        SharedData.origin = origin;
+        SharedPreferences sharedPref = context.getSharedPreferences(
+                context.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("origin", origin);
     }
 }

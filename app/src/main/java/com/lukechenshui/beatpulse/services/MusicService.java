@@ -200,12 +200,29 @@ public class MusicService extends Service {
         String playlistName = parentFile != null ? parentFile.getName() : "Unknown Playlist";
 
         SharedData.init();
-        playlist.setSongs(SharedData.getSongsFromFolder(song));
+        RealmList<Song> songs = null;
+        String origin = SharedData.getOrigin(getApplicationContext());
+        if(origin != null){
+            switch (origin){
+                case "all_songs":
+                    songs = SharedData.getAllSongs();
+                    break;
+                case "folder":
+                    songs = SharedData.getSongsFromFolder(song);
+            }
+        }
+        else{
+            songs = SharedData.getAllSongs();
+        }
+
+        playlist.setSongs(songs);
 
         RealmList<Song> playListSongs = playlist.getSongs();
+
         if(playListSongs.contains(song)){
             playlist.setLastPlayedPosition(playListSongs.lastIndexOf(song));
         }
+
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
         realm.copyToRealmOrUpdate(song);
