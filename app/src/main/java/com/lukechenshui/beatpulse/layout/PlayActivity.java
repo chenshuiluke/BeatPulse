@@ -59,7 +59,7 @@ public class PlayActivity extends ActionBarActivity {
                 currentSong = musicService.getSong();
 
                 if(musicService.isPaused()){
-                    playOrPauseButton.setImageResource(R.drawable.ic_play_arrow_white_48dp);
+                    playOrPauseButton.setImageResource(R.drawable.ic_play_arrow_white_24dp);
                     pulsator.setDuration(7000);
                 }
                 else{
@@ -71,7 +71,7 @@ public class PlayActivity extends ActionBarActivity {
                 marqueeTextView.startAnimation(marquee);
             }
             try{
-                //visualizerView.link(musicService.getPlayer());
+
             }
             catch (RuntimeException exc){
                 Log.d(TAG, "Exception when starting visualization", exc);
