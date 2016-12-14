@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.DrawerInitializer;
@@ -34,6 +35,7 @@ public class PlayActivity extends ActionBarActivity {
     private CircleButton previousSongButton;
     private CircleButton playOrPauseButton;
     private CircleButton nextSongButton;
+    private CircleButton shuffleToggleButton;
     private MusicService musicService;
     private TextView marqueeTextView;
     private Song currentSong;
@@ -45,6 +47,7 @@ public class PlayActivity extends ActionBarActivity {
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             MusicService.MusicBinder binder = (MusicService.MusicBinder)iBinder;
             musicService = binder.getService();
+
 
             if(musicService.getSong() == null || !musicService.getSong().equals(currentSong)
                     || (!musicService.getPlaylist().equals(currentPlaylist) && currentPlaylist != null)){
@@ -76,7 +79,11 @@ public class PlayActivity extends ActionBarActivity {
             catch (RuntimeException exc){
                 Log.d(TAG, "Exception when starting visualization", exc);
             }
-
+            if (musicService.isShuffling()) {
+                shuffleToggleButton.setImageResource(R.drawable.ic_arrow_forward_white_24dp);
+            } else {
+                shuffleToggleButton.setImageResource(R.drawable.ic_shuffle_white_24dp);
+            }
             musicService.setShowNotification(false);
 
             marqueeTextView.setText(currentSong.getName());
@@ -95,15 +102,29 @@ public class PlayActivity extends ActionBarActivity {
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals("MEDIA_PLAYER_PAUSED")) {
-                playOrPauseButton.setImageResource(R.drawable.ic_play_arrow_white_24dp);
-                marqueeTextView.setText(musicService.getSong().getName());
-                pulsator.setDuration(7000);
-            } else if (intent.getAction().equals("MEDIA_PLAYER_STARTED")) {
-                playOrPauseButton.setImageResource(R.drawable.ic_pause_white_24dp);
-                marqueeTextView.setText(musicService.getSong().getName());
-                pulsator.setDuration(2000);
+            switch (intent.getAction()) {
+                case "MEDIA_PLAYER_PAUSED":
+                    playOrPauseButton.setImageResource(R.drawable.ic_play_arrow_white_24dp);
+                    marqueeTextView.setText(musicService.getSong().getName());
+                    pulsator.setDuration(7000);
+                    break;
+                case "MEDIA_PLAYER_STARTED":
+                    playOrPauseButton.setImageResource(R.drawable.ic_pause_white_24dp);
+                    marqueeTextView.setText(musicService.getSong().getName());
+                    pulsator.setDuration(2000);
+                    break;
+                case "PLAYBACK_MODE_SHUFFLE":
+                    shuffleToggleButton.setImageResource(R.drawable.ic_arrow_forward_white_24dp);
+
+                    Toast.makeText(context, "Shuffling enabled", Toast.LENGTH_SHORT).show();
+                    break;
+
+                case "PLAYBACK_MODE_NORMAL":
+                    shuffleToggleButton.setImageResource(R.drawable.ic_shuffle_white_24dp);
+                    Toast.makeText(context, "Shuffling disabled", Toast.LENGTH_SHORT).show();
+                    break;
             }
+
             Log.d(TAG, "Received broadcast: " + intent.getAction());
         }
     };
@@ -136,6 +157,9 @@ public class PlayActivity extends ActionBarActivity {
         filter.addAction("MEDIA_PLAYER_PAUSED");
         filter.addAction("MEDIA_PLAYER_STARTED");
 
+        filter.addAction("PLAYBACK_MODE_SHUFFLE");
+        filter.addAction("PLAYBACK_MODE_NORMAL");
+
         bManager.registerReceiver(receiver, filter);
 
         marqueeTextView = (TextView) findViewById(R.id.marqueeTextView);
@@ -143,6 +167,7 @@ public class PlayActivity extends ActionBarActivity {
         previousSongButton = (CircleButton) findViewById(R.id.previousSongButton);
         playOrPauseButton = (CircleButton) findViewById(R.id.playOrPauseButton);
         nextSongButton = (CircleButton) findViewById(R.id.nextSongButton);
+        shuffleToggleButton = (CircleButton) findViewById(R.id.shuffleToggleButton);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.thirdToolbar);
         setSupportActionBar(toolbar);
@@ -175,7 +200,6 @@ public class PlayActivity extends ActionBarActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        init();
     }
 
     @Override
@@ -213,5 +237,9 @@ public class PlayActivity extends ActionBarActivity {
         }
     }
 
-
+    public void toggleShuffle(View view) {
+        if (musicService != null) {
+            musicService.toggleShuffle();
+        }
+    }
 }
