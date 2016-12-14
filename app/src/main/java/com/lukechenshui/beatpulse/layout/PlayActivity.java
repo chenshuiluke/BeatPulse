@@ -57,7 +57,15 @@ public class PlayActivity extends ActionBarActivity {
             else{
                 currentPlaylist = musicService.getPlaylist();
                 currentSong = musicService.getSong();
-                playOrPauseButton.setImageResource(R.drawable.ic_pause_white_24dp);
+
+                if(musicService.isPaused()){
+                    playOrPauseButton.setImageResource(R.drawable.ic_play_arrow_white_48dp);
+                    pulsator.setDuration(7000);
+                }
+                else{
+                    playOrPauseButton.setImageResource(R.drawable.ic_pause_white_24dp);
+                    pulsator.setDuration(2000);
+                }
                 marqueeTextView.setText(musicService.getSong().getName());
                 Animation marquee = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.marquee);
                 marqueeTextView.startAnimation(marquee);
