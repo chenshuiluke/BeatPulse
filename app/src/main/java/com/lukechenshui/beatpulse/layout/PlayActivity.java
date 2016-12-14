@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.DrawerInitializer;
 import com.lukechenshui.beatpulse.R;
+import com.lukechenshui.beatpulse.SharedData;
 import com.lukechenshui.beatpulse.models.Playlist;
 import com.lukechenshui.beatpulse.models.Song;
 import com.lukechenshui.beatpulse.services.MusicService;
@@ -151,24 +152,6 @@ public class PlayActivity extends ActionBarActivity {
     }
 
     private void init(){
-        LocalBroadcastManager bManager = LocalBroadcastManager.getInstance(getApplicationContext());
-
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("MEDIA_PLAYER_PAUSED");
-        filter.addAction("MEDIA_PLAYER_STARTED");
-
-        filter.addAction("PLAYBACK_MODE_SHUFFLE");
-        filter.addAction("PLAYBACK_MODE_NORMAL");
-
-        bManager.registerReceiver(receiver, filter);
-
-        marqueeTextView = (TextView) findViewById(R.id.marqueeTextView);
-
-        previousSongButton = (CircleButton) findViewById(R.id.previousSongButton);
-        playOrPauseButton = (CircleButton) findViewById(R.id.playOrPauseButton);
-        nextSongButton = (CircleButton) findViewById(R.id.nextSongButton);
-        shuffleToggleButton = (CircleButton) findViewById(R.id.shuffleToggleButton);
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.thirdToolbar);
         setSupportActionBar(toolbar);
         Drawer drawer = DrawerInitializer.createDrawer(this, this, toolbar);
@@ -176,25 +159,46 @@ public class PlayActivity extends ActionBarActivity {
         drawer.getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
         Config.setActiveDrawer(drawer);
 
-        drawer.setSelection(Config.NOW_PLAYING_DRAWER_ITEM_POS+1, false);
+        drawer.setSelection(Config.NOW_PLAYING_DRAWER_ITEM_POS + 1, false);
+        LocalBroadcastManager bManager = LocalBroadcastManager.getInstance(getApplicationContext());
 
-        Song song = getIntent().getParcelableExtra("song");
-        currentPlaylist = getIntent().getParcelableExtra("playlist");
-        currentSong = song;
-        if(song != null){
-            Intent intent = new Intent(this, MusicService.class);
-            bindService(intent, connection, BIND_AUTO_CREATE);
-        }
-        else{
-            Song temp = Config.getLastSong(getApplicationContext());
-            if(temp != null){
-                currentSong = temp;
+
+        if (SharedData.getOrigin(getApplicationContext()) != null) {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction("MEDIA_PLAYER_PAUSED");
+            filter.addAction("MEDIA_PLAYER_STARTED");
+
+            filter.addAction("PLAYBACK_MODE_SHUFFLE");
+            filter.addAction("PLAYBACK_MODE_NORMAL");
+
+            bManager.registerReceiver(receiver, filter);
+
+            marqueeTextView = (TextView) findViewById(R.id.marqueeTextView);
+
+            previousSongButton = (CircleButton) findViewById(R.id.previousSongButton);
+            playOrPauseButton = (CircleButton) findViewById(R.id.playOrPauseButton);
+            nextSongButton = (CircleButton) findViewById(R.id.nextSongButton);
+            shuffleToggleButton = (CircleButton) findViewById(R.id.shuffleToggleButton);
+
+
+            Song song = getIntent().getParcelableExtra("song");
+            currentPlaylist = getIntent().getParcelableExtra("playlist");
+            currentSong = song;
+            if (song != null) {
                 Intent intent = new Intent(this, MusicService.class);
                 bindService(intent, connection, BIND_AUTO_CREATE);
+            } else {
+                Song temp = Config.getLastSong(getApplicationContext());
+                if (temp != null) {
+                    currentSong = temp;
+                    Intent intent = new Intent(this, MusicService.class);
+                    bindService(intent, connection, BIND_AUTO_CREATE);
+                }
             }
+            pulsator = (PulsatorLayout) findViewById(R.id.pulsator);
+            pulsator.start();
         }
-        pulsator = (PulsatorLayout) findViewById(R.id.pulsator);
-        pulsator.start();
+
     }
 
     @Override
@@ -205,6 +209,7 @@ public class PlayActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
         init();
     }
 

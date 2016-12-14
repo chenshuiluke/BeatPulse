@@ -275,7 +275,7 @@ public class MusicService extends Service {
     }
 
     public void playNext(){
-
+        loadPlaylist();
         Song nextSong = null;
         if (!isShuffling()) {
             if (playlist != null) {
@@ -314,6 +314,7 @@ public class MusicService extends Service {
     }
 
     public void playPrevious(){
+        loadPlaylist();
         Song nextSong = null;
         if(playlist != null){
             int pos = playlist.getLastPlayedPosition();

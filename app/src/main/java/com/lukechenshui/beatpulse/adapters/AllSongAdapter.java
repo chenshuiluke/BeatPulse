@@ -14,15 +14,11 @@ import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.DrawerInitializer;
 import com.lukechenshui.beatpulse.R;
 import com.lukechenshui.beatpulse.SharedData;
-import com.lukechenshui.beatpulse.Utility;
 import com.lukechenshui.beatpulse.models.Playlist;
 import com.lukechenshui.beatpulse.models.Song;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import io.realm.Realm;
 
 /**
  * Created by luke on 12/11/16.
@@ -79,8 +75,9 @@ public class AllSongAdapter extends RecyclerView.Adapter<AllSongAdapter.SongHold
                         bundle.putParcelable("playlust", playlist);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         intent.putExtras(bundle);
-                        context.startActivity(intent);
                         SharedData.setOrigin(context, "all_songs");
+                        context.startActivity(intent);
+
                         ((Activity)context).finish();
                     }
                 }

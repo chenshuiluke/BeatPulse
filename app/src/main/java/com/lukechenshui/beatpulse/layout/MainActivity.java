@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBarActivity;
@@ -94,12 +93,8 @@ public class MainActivity extends ActionBarActivity {
             firstRun = false;
             if(Config.getLastSong(getApplicationContext()) != null){
                 drawer.setSelection(Config.NOW_PLAYING_DRAWER_ITEM_POS+1, true);
-            }
-            else if(results.size() > 0){
+            } else {
                 drawer.setSelection(Config.ALL_SONGS_DRAWER_ITEM_POS+1, true);
-            }
-            else{
-                drawer.setSelection(Config.BROWSE_DRAWER_ITEM_POS+1, true);
             }
         }
     }

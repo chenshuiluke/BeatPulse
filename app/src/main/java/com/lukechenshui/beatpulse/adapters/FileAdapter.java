@@ -90,8 +90,9 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileHolder> {
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             intent.putExtras(bundle);
                             realm.commitTransaction();
-                            context.startActivity(intent);
                             SharedData.setOrigin(context, "folder");
+                            context.startActivity(intent);
+
                             ((Activity)context).finish();
                         }
                     }
