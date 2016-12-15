@@ -334,6 +334,13 @@ public class MusicService extends Service {
         return replayMode == REPLAY_ONE;
     }
 
+    public boolean isReplayingAllSongs(){
+        return replayMode == REPLAY_ALL;
+    }
+    public boolean isReplayingNoSongs(){
+        return replayMode == REPLAY_NONE;
+    }
+
     public void playNext(boolean replayOne){
         if (playlist != null && song != null) {
             loadPlaylist();

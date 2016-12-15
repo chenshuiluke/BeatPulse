@@ -61,10 +61,10 @@ public class PlayActivity extends ActionBarActivity {
             }
 
             if (musicService.isPaused()) {
-                playOrPauseButton.setImageResource(R.drawable.ic_play_arrow_white_24dp);
+                playOrPauseButton.setImageResource(R.drawable.ic_play_arrow_black_24dp);
                 pulsator.setDuration(7000);
             } else {
-                playOrPauseButton.setImageResource(R.drawable.ic_pause_white_24dp);
+                playOrPauseButton.setImageResource(R.drawable.ic_pause_black_24dp);
                 pulsator.setDuration(2000);
             }
 
@@ -73,6 +73,18 @@ public class PlayActivity extends ActionBarActivity {
             } else {
                 shuffleToggleButton.setImageResource(R.drawable.ic_arrow_forward_white_24dp);
 
+            }
+
+            if(musicService.isReplayingOneSong()){
+                replayToggleButton.setImageResource(R.drawable.ic_repeat_one_white_24dp);
+            }
+
+            if(musicService.isReplayingAllSongs()){
+                replayToggleButton.setImageResource(R.drawable.ic_repeat_white_24dp);
+            }
+
+            if(musicService.isReplayingNoSongs()){
+                replayToggleButton.setImageResource(R.drawable.ic_stop_white_24dp);
             }
             bound = true;
             Log.d(TAG, "Connected to music service");
@@ -90,12 +102,12 @@ public class PlayActivity extends ActionBarActivity {
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case "MEDIA_PLAYER_PAUSED":
-                    playOrPauseButton.setImageResource(R.drawable.ic_play_arrow_white_24dp);
+                    playOrPauseButton.setImageResource(R.drawable.ic_play_arrow_black_24dp);
                     marqueeTextView.setText(musicService.getSong().getName());
                     pulsator.setDuration(7000);
                     break;
                 case "MEDIA_PLAYER_STARTED":
-                    playOrPauseButton.setImageResource(R.drawable.ic_pause_white_24dp);
+                    playOrPauseButton.setImageResource(R.drawable.ic_pause_black_24dp);
                     marqueeTextView.setText(musicService.getSong().getName());
                     pulsator.setDuration(2000);
                     break;
@@ -112,17 +124,17 @@ public class PlayActivity extends ActionBarActivity {
                     break;
 
                 case "REPLAY_MODE_ONE":
-                    replayToggleButton.setImageResource(R.drawable.ic_arrow_forward_white_24dp);
+                    replayToggleButton.setImageResource(R.drawable.ic_repeat_one_white_24dp);
 
                     Toast.makeText(context, "Replaying one song", Toast.LENGTH_SHORT).show();
                     break;
                 case "REPLAY_MODE_NONE":
-                    replayToggleButton.setImageResource(R.drawable.ic_arrow_forward_white_24dp);
+                    replayToggleButton.setImageResource(R.drawable.ic_stop_white_24dp);
 
                     Toast.makeText(context, "Stopping after this song", Toast.LENGTH_SHORT).show();
                     break;
                 case "REPLAY_MODE_ALL":
-                    replayToggleButton.setImageResource(R.drawable.ic_arrow_forward_white_24dp);
+                    replayToggleButton.setImageResource(R.drawable.ic_repeat_white_24dp);
 
                     Toast.makeText(context, "Replaying all songs", Toast.LENGTH_SHORT).show();
                     break;

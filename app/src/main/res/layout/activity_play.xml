@@ -71,8 +71,8 @@
                 android:layout_height="64dp"
                 android:layout_gravity="center_vertical"
                 android:onClick="startOrPauseMediaPlayer"
-                android:src="@drawable/ic_play_arrow_white_24dp"
-                app:cb_color="?attr/colorPrimary" />
+                android:src="@drawable/ic_play_arrow_black_24dp"
+                app:cb_color="@color/md_white_1000" />
             <at.markushi.ui.CircleButton
                 android:id="@+id/nextSongButton"
                 android:layout_width="60dp"
