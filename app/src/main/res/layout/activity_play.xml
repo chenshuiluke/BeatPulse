@@ -50,8 +50,8 @@
             android:layout_centerHorizontal="true">
             <at.markushi.ui.CircleButton
                 android:id="@+id/replayToggleButton"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_gravity="center_vertical"
                 android:onClick="toggleReplay"
                 android:src="@drawable/ic_shuffle_white_24dp"
@@ -59,8 +59,8 @@
                 />
             <at.markushi.ui.CircleButton
                 android:id="@+id/previousSongButton"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_gravity="center_vertical"
                 android:onClick="playPreviousSong"
                 android:src="@drawable/ic_skip_previous_white_24dp"
@@ -75,8 +75,8 @@
                 app:cb_color="@color/md_white_1000" />
             <at.markushi.ui.CircleButton
                 android:id="@+id/nextSongButton"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_gravity="center_vertical"
                 android:onClick="playNextSong"
                 android:src="@drawable/ic_skip_next_white_24dp"
@@ -84,8 +84,8 @@
 
             <at.markushi.ui.CircleButton
                 android:id="@+id/shuffleToggleButton"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_gravity="center_vertical"
                 android:onClick="toggleShuffle"
                 android:src="@drawable/ic_shuffle_white_24dp"
