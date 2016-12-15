@@ -3,7 +3,6 @@ package com.lukechenshui.beatpulse.adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -69,12 +68,9 @@ public class AllSongAdapter extends RecyclerView.Adapter<AllSongAdapter.SongHold
                         Intent intent = new Intent(context, DrawerInitializer.getDrawerActivities().get(Config.NOW_PLAYING_DRAWER_ITEM_POS));
 
                         Playlist playlist = new Playlist(songs, "All Songs");
-
-                        Bundle bundle = new Bundle();
-                        bundle.putParcelable("song", currentSong);
-                        bundle.putParcelable("playlust", playlist);
+                        SharedData.SongRequest.submitSongRequest(currentSong);
+                        SharedData.PlaylistRequest.submitPlaylistRequest(playlist);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.putExtras(bundle);
                         SharedData.setOrigin(context, "all_songs");
                         context.startActivity(intent);
 

@@ -68,4 +68,46 @@ public class SharedData {
         editor.putString("origin", origin);
         editor.commit();
     }
+
+    public static class SongRequest {
+        static Song song = null;
+        static boolean accepted = false;
+
+        public static void submitSongRequest(Song songToRequest) {
+            song = songToRequest;
+            accepted = false;
+        }
+
+        public static Song acceptSongRequest() {
+            accepted = true;
+            return song;
+        }
+
+        public static boolean wasAccepted() {
+            return accepted && !isRequestEmpty();
+        }
+
+        public static boolean isRequestEmpty() {
+            return song == null;
+        }
+    }
+
+    public static class PlaylistRequest {
+        static Playlist playlist = null;
+        static boolean accepted = false;
+
+        public static void submitPlaylistRequest(Playlist playlistToRequest) {
+            playlist = playlistToRequest;
+            accepted = false;
+        }
+
+        public static Playlist acceptPlaylistRequest() {
+            accepted = true;
+            return playlist;
+        }
+
+        public static boolean wasAccepted() {
+            return accepted;
+        }
+    }
 }

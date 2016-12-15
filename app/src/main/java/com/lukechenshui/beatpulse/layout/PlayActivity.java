@@ -50,48 +50,31 @@ public class PlayActivity extends ActionBarActivity {
             musicService = binder.getService();
 
 
-            if(musicService.getSong() == null || !musicService.getSong().equals(currentSong)
-                    || (!musicService.getPlaylist().equals(currentPlaylist) && currentPlaylist != null)){
-                //Doesn't restart the current song if the new song is the same as the currently playing one.
-                musicService.init(currentSong, currentPlaylist);
-
-                Animation marquee = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.marquee);
-                marqueeTextView.startAnimation(marquee);
-            }
-            else{
-                currentPlaylist = musicService.getPlaylist();
-                currentSong = musicService.getSong();
-
-                if(musicService.isPaused()){
-                    playOrPauseButton.setImageResource(R.drawable.ic_play_arrow_white_24dp);
-                    pulsator.setDuration(7000);
+            if (musicService != null) {
+                musicService.init();
+                if (SharedData.SongRequest.wasAccepted()) {
+                    marqueeTextView.setText(musicService.getSong().getName());
+                    Animation marquee = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.marquee);
+                    marqueeTextView.startAnimation(marquee);
                 }
-                else{
-                    playOrPauseButton.setImageResource(R.drawable.ic_pause_white_24dp);
-                    pulsator.setDuration(2000);
-                }
-                marqueeTextView.setText(musicService.getSong().getName());
-                Animation marquee = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.marquee);
-                marqueeTextView.startAnimation(marquee);
             }
-            try{
 
+            if (musicService.isPaused()) {
+                playOrPauseButton.setImageResource(R.drawable.ic_play_arrow_white_24dp);
+                pulsator.setDuration(7000);
+            } else {
+                playOrPauseButton.setImageResource(R.drawable.ic_pause_white_24dp);
+                pulsator.setDuration(2000);
             }
-            catch (RuntimeException exc){
-                Log.d(TAG, "Exception when starting visualization", exc);
-            }
+
             if (musicService.isShuffling()) {
                 shuffleToggleButton.setImageResource(R.drawable.ic_arrow_forward_white_24dp);
             } else {
                 shuffleToggleButton.setImageResource(R.drawable.ic_shuffle_white_24dp);
             }
-            musicService.setShowNotification(false);
-
-            marqueeTextView.setText(currentSong.getName());
-            Animation marquee = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.marquee);
-            marqueeTextView.startAnimation(marquee);
             bound = true;
             Log.d(TAG, "Connected to music service");
+
         }
 
         @Override
@@ -140,6 +123,7 @@ public class PlayActivity extends ActionBarActivity {
             unbindService(connection);
             bound=false;
         }
+        LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(receiver);
 
     }
 
@@ -181,20 +165,9 @@ public class PlayActivity extends ActionBarActivity {
             shuffleToggleButton = (CircleButton) findViewById(R.id.shuffleToggleButton);
 
 
-            Song song = getIntent().getParcelableExtra("song");
-            currentPlaylist = getIntent().getParcelableExtra("playlist");
-            currentSong = song;
-            if (song != null) {
-                Intent intent = new Intent(this, MusicService.class);
-                bindService(intent, connection, BIND_AUTO_CREATE);
-            } else {
-                Song temp = Config.getLastSong(getApplicationContext());
-                if (temp != null) {
-                    currentSong = temp;
-                    Intent intent = new Intent(this, MusicService.class);
-                    bindService(intent, connection, BIND_AUTO_CREATE);
-                }
-            }
+            Intent intent = new Intent(this, MusicService.class);
+            bindService(intent, connection, BIND_AUTO_CREATE);
+            //Song temp = Config.getLastSong(getApplicationContext());
             pulsator = (PulsatorLayout) findViewById(R.id.pulsator);
             pulsator.start();
         }

@@ -3,7 +3,6 @@ package com.lukechenshui.beatpulse.adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -85,10 +84,8 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileHolder> {
                             String playlistName = parentFile != null ? parentFile.getName() : "Unknown Playlist";
                             Intent intent = new Intent(context, DrawerInitializer.getDrawerActivities().get(Config.NOW_PLAYING_DRAWER_ITEM_POS));
 
-                            Bundle bundle = new Bundle();
-                            bundle.putParcelable("song", song);
+                            SharedData.SongRequest.submitSongRequest(song);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            intent.putExtras(bundle);
                             realm.commitTransaction();
                             SharedData.setOrigin(context, "folder");
                             context.startActivity(intent);

@@ -94,38 +94,40 @@ public class MusicService extends Service {
     }
 
     public void play(){
-        try{
-            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(getApplicationContext(),
-                    Util.getUserAgent(getApplicationContext(), "BeatPulse"));
+        if (song != null) {
+            try {
+                DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(getApplicationContext(),
+                        Util.getUserAgent(getApplicationContext(), "BeatPulse"));
 // Produces Extractor instances for parsing the media data.
-            ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+                ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
 // This is the MediaSource representing the media to be played.
-            MediaSource songSource = new ExtractorMediaSource(song.getFileUri(),
-                    dataSourceFactory, extractorsFactory, null, null);
-            player.prepare(songSource);
+                MediaSource songSource = new ExtractorMediaSource(song.getFileUri(),
+                        dataSourceFactory, extractorsFactory, null, null);
+                player.prepare(songSource);
 
-            player.setPlayWhenReady(true);
+                player.setPlayWhenReady(true);
 
-            if(pausePos != null){
-                player.seekTo(pausePos);
+                if (pausePos != null) {
+                    player.seekTo(pausePos);
+                }
+
+            } catch (Exception exc) {
+                //Catches the exception raised when preparing the same FFmpegMediaPlayer multiple times.
+                Log.d(TAG, "Exception occurred while starting to play " + song.getName(), exc);
             }
 
-        }
-        catch (Exception exc){
-            //Catches the exception raised when preparing the same FFmpegMediaPlayer multiple times.
-            Log.d(TAG, "Exception occurred while starting to play " + song.getName(), exc);
+            Realm realm = Realm.getDefaultInstance();
+            realm.beginTransaction();
+            realm.copyToRealmOrUpdate(song);
+            realm.commitTransaction();
+            if (showNotification) {
+                showNotification();
+            }
+            Intent broadcastIntent = new Intent();
+            broadcastIntent.setAction("MEDIA_PLAYER_STARTED");
+            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(broadcastIntent);
         }
 
-        Realm realm = Realm.getDefaultInstance();
-        realm.beginTransaction();
-        realm.copyToRealmOrUpdate(song);
-        realm.commitTransaction();
-        if(showNotification){
-            showNotification();
-        }
-        Intent broadcastIntent = new Intent();
-        broadcastIntent.setAction("MEDIA_PLAYER_STARTED");
-        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(broadcastIntent);
     }
 
 
@@ -138,19 +140,12 @@ public class MusicService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         //onBind is only called when the first client connects. All other bind attempts just return the same binder object
-
-        return binder;
-    }
-
-    public void init(final Song song, Playlist newPlaylist){
-        getPlaybackMode();
         Handler handler = new Handler();
         BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         TrackSelection.Factory trackSelection = new AdaptiveVideoTrackSelection.Factory(bandwidthMeter);
         TrackSelector trackSelector = new DefaultTrackSelector(handler, trackSelection);
         LoadControl loadControl = new DefaultLoadControl();
 
-        resetPlayer();
         player = ExoPlayerFactory.newSimpleInstance(getApplicationContext(), trackSelector, loadControl);
         player.addListener(new ExoPlayer.EventListener() {
             @Override
@@ -180,11 +175,22 @@ public class MusicService extends Service {
 
             }
         });
-        if(song != null){
-            this.song = song;
-            playlist = newPlaylist;
-            loadPlaylist();
+        return binder;
+    }
+
+    public void init() {
+        getPlaybackMode();
+        if (SharedData.SongRequest.isRequestEmpty()) {
+            SharedData.SongRequest.submitSongRequest(Config.getLastSong(getApplicationContext()));
+        }
+        if (!SharedData.SongRequest.wasAccepted()) {
+            song = SharedData.SongRequest.acceptSongRequest();
+            resetPlayer();
             playSong(song);
+        }
+        if (!SharedData.PlaylistRequest.wasAccepted()) {
+            playlist = SharedData.PlaylistRequest.acceptPlaylistRequest();
+            loadPlaylist();
         }
     }
 
@@ -232,39 +238,41 @@ public class MusicService extends Service {
     }
 
     private void loadPlaylist(){
-        playlist = new Playlist();
-        File parentFile = song.getFile().getParentFile();
-        String playlistName = parentFile != null ? parentFile.getName() : "Unknown Playlist";
+        if (song != null) {
+            playlist = new Playlist();
+            File parentFile = song.getFile().getParentFile();
+            String playlistName = parentFile != null ? parentFile.getName() : "Unknown Playlist";
 
-        SharedData.init();
-        RealmList<Song> songs = null;
-        String origin = SharedData.getOrigin(getApplicationContext());
-        if(origin != null){
-            switch (origin){
-                case "all_songs":
-                    songs = SharedData.getAllSongs();
-                    break;
-                case "folder":
-                    songs = SharedData.getSongsFromFolder(song);
+            SharedData.init();
+            RealmList<Song> songs = null;
+            String origin = SharedData.getOrigin(getApplicationContext());
+            if (origin != null) {
+                switch (origin) {
+                    case "all_songs":
+                        songs = SharedData.getAllSongs();
+                        break;
+                    case "folder":
+                        songs = SharedData.getSongsFromFolder(song);
+                }
+            } else {
+                songs = SharedData.getAllSongs();
             }
+
+            playlist.setSongs(songs);
+
+            RealmList<Song> playListSongs = playlist.getSongs();
+
+            if (playListSongs.contains(song)) {
+                playlist.setLastPlayedPosition(playListSongs.lastIndexOf(song));
+            }
+
+            Realm realm = Realm.getDefaultInstance();
+            realm.beginTransaction();
+            realm.copyToRealmOrUpdate(song);
+            realm.copyToRealmOrUpdate(playlist);
+            realm.commitTransaction();
         }
-        else{
-            songs = SharedData.getAllSongs();
-        }
 
-        playlist.setSongs(songs);
-
-        RealmList<Song> playListSongs = playlist.getSongs();
-
-        if(playListSongs.contains(song)){
-            playlist.setLastPlayedPosition(playListSongs.lastIndexOf(song));
-        }
-
-        Realm realm = Realm.getDefaultInstance();
-        realm.beginTransaction();
-        realm.copyToRealmOrUpdate(song);
-        realm.copyToRealmOrUpdate(playlist);
-        realm.commitTransaction();
     }
 
     private void resetPlayer(){
@@ -275,25 +283,66 @@ public class MusicService extends Service {
     }
 
     public void playNext(){
-        loadPlaylist();
-        Song nextSong = null;
-        if (!isShuffling()) {
+        if (playlist != null && song != null) {
+            loadPlaylist();
+            Song nextSong = null;
+            if (!isShuffling()) {
+                if (playlist != null) {
+                    int pos = playlist.getLastPlayedPosition();
+                    RealmList<Song> playlistSongs = playlist.getSongs();
+
+                    if (playlistSongs != null) {
+                        if (pos + 1 <= playlistSongs.size() - 1) {
+                            pos++;
+                            playlist.setLastPlayedPosition(pos);
+                            nextSong = playlistSongs.get(pos);
+                        } else {
+                            if (playlistSongs.size() > 0) {
+                                nextSong = playlistSongs.first();
+                                playlist.setLastPlayedPosition(0);
+                            } else {
+                                nextSong = song;
+                            }
+                        }
+                    } else {
+                        nextSong = song;
+                    }
+                } else {
+                    nextSong = song;
+                }
+            }
+            else{
+                Random random = new Random();
+                int position = random.nextInt(playlist.getSongs().size() - 1);
+                nextSong = playlist.getSongs().get(position);
+            }
+
+
+            playSong(nextSong);
+        }
+    }
+
+    public void playPrevious(){
+        if (playlist != null && song != null) {
+            loadPlaylist();
+            Song nextSong = null;
             if (playlist != null) {
                 int pos = playlist.getLastPlayedPosition();
                 RealmList<Song> playlistSongs = playlist.getSongs();
-
                 if (playlistSongs != null) {
-                    if (pos + 1 <= playlistSongs.size() - 1) {
-                        pos++;
+                    if (pos - 1 >= 0) {
+                        pos--;
                         playlist.setLastPlayedPosition(pos);
                         nextSong = playlistSongs.get(pos);
-                    } else {
+                    }
+                    else{
+                        playlist.setLastPlayedPosition(playlistSongs.size() - 1);
                         if (playlistSongs.size() > 0) {
-                            nextSong = playlistSongs.first();
-                            playlist.setLastPlayedPosition(0);
+                            nextSong = playlistSongs.last();
                         } else {
                             nextSong = song;
                         }
+
                     }
                 } else {
                     nextSong = song;
@@ -302,60 +351,24 @@ public class MusicService extends Service {
             else{
                 nextSong = song;
             }
-        }
-        else{
-            Random random = new Random();
-            int position = random.nextInt(playlist.getSongs().size() - 1);
-            nextSong = playlist.getSongs().get(position);
+            playSong(nextSong);
         }
 
-
-        playSong(nextSong);
-    }
-
-    public void playPrevious(){
-        loadPlaylist();
-        Song nextSong = null;
-        if(playlist != null){
-            int pos = playlist.getLastPlayedPosition();
-            RealmList<Song> playlistSongs = playlist.getSongs();
-            if(playlistSongs != null){
-                if(pos-1 >= 0){
-                    pos--;
-                    playlist.setLastPlayedPosition(pos);
-                    nextSong = playlistSongs.get(pos);
-                }
-                else{
-                    playlist.setLastPlayedPosition(playlistSongs.size()-1);
-                    if(playlistSongs.size() > 0){
-                        nextSong = playlistSongs.last();
-                    }
-                    else{
-                        nextSong = song;
-                    }
-
-                }
-            }
-            else{
-                nextSong = song;
-            }
-        }
-        else{
-            nextSong = song;
-        }
-        playSong(nextSong);
     }
 
     private void playSong(Song songToPlay){
         //loadPlaylist();
-        resetPlayer();
+        if (songToPlay != null) {
+            resetPlayer();
+            song = songToPlay;
+            Config.setLastSong(songToPlay, getApplicationContext());
+            if (isShowNotification()) {
+                showNotification();
+            }
 
-        Config.setLastSong(songToPlay, getApplicationContext());
-        if(isShowNotification()){
-            showNotification();
+            play();
         }
-        song = songToPlay;
-        play();
+
 
     }
 
@@ -393,65 +406,66 @@ public class MusicService extends Service {
     }
 
     private void showNotification() {
-        //Call this again to update an existing notification as well.
-        Intent notificationIntent = new Intent(this, PlayActivity.class);
-        notificationIntent.setAction(Config.ACTION.MAIN_ACTION);
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
-                notificationIntent, 0);
+        if (song != null) {
+            //Call this again to update an existing notification as well.
+            Intent notificationIntent = new Intent(this, PlayActivity.class);
+            notificationIntent.setAction(Config.ACTION.MAIN_ACTION);
+            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+                    notificationIntent, 0);
 
-        Intent previousIntent = new Intent(this, MusicService.class);
-        previousIntent.setAction(Config.ACTION.PREV_ACTION);
-        PendingIntent ppreviousIntent = PendingIntent.getService(this, 0,
-                previousIntent, 0);
+            Intent previousIntent = new Intent(this, MusicService.class);
+            previousIntent.setAction(Config.ACTION.PREV_ACTION);
+            PendingIntent ppreviousIntent = PendingIntent.getService(this, 0,
+                    previousIntent, 0);
 
 
+            Intent nextIntent = new Intent(this, MusicService.class);
+            nextIntent.setAction(Config.ACTION.NEXT_ACTION);
+            PendingIntent pnextIntent = PendingIntent.getService(this, 0,
+                    nextIntent, 0);
 
-        Intent nextIntent = new Intent(this, MusicService.class);
-        nextIntent.setAction(Config.ACTION.NEXT_ACTION);
-        PendingIntent pnextIntent = PendingIntent.getService(this, 0,
-                nextIntent, 0);
+            Bitmap icon = BitmapFactory.decodeResource(getResources(),
+                    R.drawable.ic_music_note_black_24dp);
 
-        Bitmap icon = BitmapFactory.decodeResource(getResources(),
-                R.drawable.ic_music_note_black_24dp);
+            Intent playIntent = new Intent(this, MusicService.class);
+            int playButtonId;
+            String playButtonString;
 
-        Intent playIntent = new Intent(this, MusicService.class);
-        int playButtonId;
-        String playButtonString;
+            if (player.getPlayWhenReady()) {
+                playButtonId = R.drawable.ic_pause_white_24dp;
+                playButtonString = "Pause";
+                playIntent.setAction(Config.ACTION.PAUSE_ACTION);
+            } else {
+                playButtonId = R.drawable.ic_play_arrow_white_24dp;
+                playButtonString = "Play";
+                playIntent.setAction(Config.ACTION.PLAY_ACTION);
+            }
+            PendingIntent pplayIntent = PendingIntent.getService(this, 0,
+                    playIntent, 0);
 
-        if(player.getPlayWhenReady()){
-            playButtonId = R.drawable.ic_pause_white_24dp;
-            playButtonString = "Pause";
-            playIntent.setAction(Config.ACTION.PAUSE_ACTION);
+            Notification notification = new NotificationCompat.Builder(this)
+                    .setContentTitle("BeatPulse")
+                    .setTicker("BeatPulse")
+                    .setContentText(song.getName())
+                    .setSmallIcon(R.drawable.ic_music_note_black_24dp)
+                    .setLargeIcon(Bitmap.createScaledBitmap(icon, 128, 128, false))
+                    .setContentIntent(pendingIntent)
+                    .setOngoing(true)
+                    .addAction(android.R.drawable.ic_media_previous, "Previous",
+                            ppreviousIntent)
+                    .addAction(playButtonId, playButtonString,
+                            pplayIntent)
+                    .addAction(android.R.drawable.ic_media_next, "Next",
+                            pnextIntent)
+                    .setPriority(PRIORITY_MAX)
+                    .setWhen(0)
+                    .build();
+            startForeground(Config.NOTIFICATION_ID.MUSIC_SERVICE,
+                    notification);
         }
-        else{
-            playButtonId = R.drawable.ic_play_arrow_white_24dp;
-            playButtonString = "Play";
-            playIntent.setAction(Config.ACTION.PLAY_ACTION);
-        }
-        PendingIntent pplayIntent = PendingIntent.getService(this, 0,
-                playIntent, 0);
 
-        Notification notification = new NotificationCompat.Builder(this)
-                .setContentTitle("BeatPulse")
-                .setTicker("BeatPulse")
-                .setContentText(song.getName())
-                .setSmallIcon(R.drawable.ic_music_note_black_24dp)
-                .setLargeIcon(Bitmap.createScaledBitmap(icon, 128, 128, false))
-                .setContentIntent(pendingIntent)
-                .setOngoing(true)
-                .addAction(android.R.drawable.ic_media_previous, "Previous",
-                        ppreviousIntent)
-                .addAction(playButtonId, playButtonString,
-                        pplayIntent)
-                .addAction(android.R.drawable.ic_media_next, "Next",
-                        pnextIntent)
-                .setPriority(PRIORITY_MAX)
-                .setWhen(0)
-                .build();
-        startForeground(Config.NOTIFICATION_ID.MUSIC_SERVICE,
-                notification);
 
     }
 
