@@ -49,6 +49,15 @@
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true">
             <at.markushi.ui.CircleButton
+                android:id="@+id/replayToggleButton"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_gravity="center_vertical"
+                android:onClick="toggleReplay"
+                android:src="@drawable/ic_shuffle_white_24dp"
+                app:cb_color="?attr/colorPrimary"
+                />
+            <at.markushi.ui.CircleButton
                 android:id="@+id/previousSongButton"
                 android:layout_width="60dp"
                 android:layout_height="60dp"

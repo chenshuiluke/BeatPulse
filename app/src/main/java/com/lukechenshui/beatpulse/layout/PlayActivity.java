@@ -37,6 +37,7 @@ public class PlayActivity extends ActionBarActivity {
     private CircleButton playOrPauseButton;
     private CircleButton nextSongButton;
     private CircleButton shuffleToggleButton;
+    private CircleButton replayToggleButton;
     private MusicService musicService;
     private TextView marqueeTextView;
     private Song currentSong;
@@ -68,9 +69,10 @@ public class PlayActivity extends ActionBarActivity {
             }
 
             if (musicService.isShuffling()) {
-                shuffleToggleButton.setImageResource(R.drawable.ic_arrow_forward_white_24dp);
-            } else {
                 shuffleToggleButton.setImageResource(R.drawable.ic_shuffle_white_24dp);
+            } else {
+                shuffleToggleButton.setImageResource(R.drawable.ic_arrow_forward_white_24dp);
+
             }
             bound = true;
             Log.d(TAG, "Connected to music service");
@@ -98,14 +100,31 @@ public class PlayActivity extends ActionBarActivity {
                     pulsator.setDuration(2000);
                     break;
                 case "PLAYBACK_MODE_SHUFFLE":
-                    shuffleToggleButton.setImageResource(R.drawable.ic_arrow_forward_white_24dp);
+                    shuffleToggleButton.setImageResource(R.drawable.ic_shuffle_white_24dp);
 
                     Toast.makeText(context, "Shuffling enabled", Toast.LENGTH_SHORT).show();
                     break;
 
                 case "PLAYBACK_MODE_NORMAL":
-                    shuffleToggleButton.setImageResource(R.drawable.ic_shuffle_white_24dp);
+                    shuffleToggleButton.setImageResource(R.drawable.ic_arrow_forward_white_24dp);
+
                     Toast.makeText(context, "Shuffling disabled", Toast.LENGTH_SHORT).show();
+                    break;
+
+                case "REPLAY_MODE_ONE":
+                    replayToggleButton.setImageResource(R.drawable.ic_arrow_forward_white_24dp);
+
+                    Toast.makeText(context, "Replaying one song", Toast.LENGTH_SHORT).show();
+                    break;
+                case "REPLAY_MODE_NONE":
+                    replayToggleButton.setImageResource(R.drawable.ic_arrow_forward_white_24dp);
+
+                    Toast.makeText(context, "Stopping after this song", Toast.LENGTH_SHORT).show();
+                    break;
+                case "REPLAY_MODE_ALL":
+                    replayToggleButton.setImageResource(R.drawable.ic_arrow_forward_white_24dp);
+
+                    Toast.makeText(context, "Replaying all songs", Toast.LENGTH_SHORT).show();
                     break;
             }
 
@@ -155,6 +174,9 @@ public class PlayActivity extends ActionBarActivity {
             filter.addAction("PLAYBACK_MODE_SHUFFLE");
             filter.addAction("PLAYBACK_MODE_NORMAL");
 
+            filter.addAction("REPLAY_MODE_NONE");
+            filter.addAction("REPLAY_MODE_ALL");
+            filter.addAction("REPLAY_MODE_ONE");
             bManager.registerReceiver(receiver, filter);
 
             marqueeTextView = (TextView) findViewById(R.id.marqueeTextView);
@@ -163,7 +185,7 @@ public class PlayActivity extends ActionBarActivity {
             playOrPauseButton = (CircleButton) findViewById(R.id.playOrPauseButton);
             nextSongButton = (CircleButton) findViewById(R.id.nextSongButton);
             shuffleToggleButton = (CircleButton) findViewById(R.id.shuffleToggleButton);
-
+            replayToggleButton = (CircleButton) findViewById(R.id.replayToggleButton);
 
             Intent intent = new Intent(this, MusicService.class);
             bindService(intent, connection, BIND_AUTO_CREATE);
@@ -205,7 +227,7 @@ public class PlayActivity extends ActionBarActivity {
 
     public void playNextSong(View view){
         if(musicService != null){
-            musicService.playNext();
+            musicService.playNext(false);
         }
     }
 
@@ -218,6 +240,12 @@ public class PlayActivity extends ActionBarActivity {
     public void toggleShuffle(View view) {
         if (musicService != null) {
             musicService.toggleShuffle();
+        }
+    }
+
+    public void toggleReplay(View view){
+        if(musicService != null){
+            musicService.toggleReplay();
         }
     }
 }

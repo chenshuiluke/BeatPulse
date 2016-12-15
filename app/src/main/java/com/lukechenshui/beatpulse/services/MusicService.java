@@ -57,8 +57,16 @@ import static android.app.Notification.PRIORITY_MAX;
 public class MusicService extends Service {
     public final int PLAYBACK_NORMAL = 0;
     public final int PLAYBACK_SHUFFLE = 1;
+
+    public final int REPLAY_ALL = 10;
+    public final int REPLAY_ONE = 11;
+    public final int REPLAY_NONE = 12;
+
     private final String TAG = "MusicService";
+
     public int playbackMode;
+    public int replayMode;
+
     MusicBinder binder = new MusicBinder();
     Song song;
     Playlist playlist;
@@ -156,7 +164,12 @@ public class MusicService extends Service {
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
                 if(playbackState == ExoPlayer.STATE_ENDED){
-                    playNext();
+                    if(replayMode == REPLAY_ONE){
+                        playNext(true);
+                    }
+                    else if(replayMode != REPLAY_NONE){
+                        playNext(false);
+                    }
                 }
             }
 
@@ -180,6 +193,7 @@ public class MusicService extends Service {
 
     public void init() {
         getPlaybackMode();
+        getReplayMode();
         if (SharedData.SongRequest.isRequestEmpty()) {
             SharedData.SongRequest.submitSongRequest(Config.getLastSong(getApplicationContext()));
         }
@@ -202,6 +216,14 @@ public class MusicService extends Service {
         return playbackMode;
 
     }
+    public int getReplayMode() {
+        SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(
+                getApplicationContext().getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+
+        replayMode = sharedPref.getInt("replayMode", REPLAY_ALL);
+        return replayMode;
+
+    }
 
     public void toggleShuffle() {
         LocalBroadcastManager manager = LocalBroadcastManager.getInstance(getApplicationContext());
@@ -220,6 +242,32 @@ public class MusicService extends Service {
                 getApplicationContext().getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putInt("playbackMode", playbackMode);
+        editor.commit();
+
+        manager.sendBroadcast(intent);
+    }
+
+    public void toggleReplay() {
+        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(getApplicationContext());
+        Intent intent = new Intent();
+        switch (replayMode) {
+            case REPLAY_ALL:
+                replayMode = REPLAY_ONE;
+                intent.setAction("REPLAY_MODE_ONE");
+                break;
+            case REPLAY_ONE:
+                replayMode = REPLAY_NONE;
+                intent.setAction("REPLAY_MODE_NONE");
+                break;
+            case REPLAY_NONE:
+                replayMode = REPLAY_ALL;
+                intent.setAction("REPLAY_MODE_ALL");
+                break;
+        }
+        SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(
+                getApplicationContext().getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putInt("replayMode", replayMode);
         editor.commit();
 
         manager.sendBroadcast(intent);
@@ -282,40 +330,50 @@ public class MusicService extends Service {
         }
     }
 
-    public void playNext(){
+    public boolean isReplayingOneSong(){
+        return replayMode == REPLAY_ONE;
+    }
+
+    public void playNext(boolean replayOne){
         if (playlist != null && song != null) {
             loadPlaylist();
             Song nextSong = null;
-            if (!isShuffling()) {
-                if (playlist != null) {
-                    int pos = playlist.getLastPlayedPosition();
-                    RealmList<Song> playlistSongs = playlist.getSongs();
+            if(replayOne){
+                nextSong = song;
+            }
+            else{
+                if (!isShuffling()) {
+                    if (playlist != null) {
+                        int pos = playlist.getLastPlayedPosition();
+                        RealmList<Song> playlistSongs = playlist.getSongs();
 
-                    if (playlistSongs != null) {
-                        if (pos + 1 <= playlistSongs.size() - 1) {
-                            pos++;
-                            playlist.setLastPlayedPosition(pos);
-                            nextSong = playlistSongs.get(pos);
-                        } else {
-                            if (playlistSongs.size() > 0) {
-                                nextSong = playlistSongs.first();
-                                playlist.setLastPlayedPosition(0);
+                        if (playlistSongs != null) {
+                            if (pos + 1 <= playlistSongs.size() - 1) {
+                                pos++;
+                                playlist.setLastPlayedPosition(pos);
+                                nextSong = playlistSongs.get(pos);
                             } else {
-                                nextSong = song;
+                                if (playlistSongs.size() > 0) {
+                                    nextSong = playlistSongs.first();
+                                    playlist.setLastPlayedPosition(0);
+                                } else {
+                                    nextSong = song;
+                                }
                             }
+                        } else {
+                            nextSong = song;
                         }
                     } else {
                         nextSong = song;
                     }
-                } else {
-                    nextSong = song;
+                }
+                else{
+                    Random random = new Random();
+                    int position = random.nextInt(playlist.getSongs().size() - 1);
+                    nextSong = playlist.getSongs().get(position);
                 }
             }
-            else{
-                Random random = new Random();
-                int position = random.nextInt(playlist.getSongs().size() - 1);
-                nextSong = playlist.getSongs().get(position);
-            }
+
 
 
             playSong(nextSong);
@@ -392,7 +450,7 @@ public class MusicService extends Service {
             }
             else if (intent.getAction().equals(Config.ACTION.NEXT_ACTION)) {
                 Log.i(TAG, "Clicked Next");
-                playNext();
+                playNext(false);
                 Toast.makeText(this, "Clicked Next!", Toast.LENGTH_SHORT).show();
             } else if (intent.getAction().equals(
                     Config.ACTION.STOPFOREGROUND_ACTION)) {
@@ -508,7 +566,6 @@ public class MusicService extends Service {
             stopForeground(true);
             manager.cancelAll();
         }
-
     }
 
     public class MusicBinder extends Binder {
