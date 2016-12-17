@@ -12,6 +12,12 @@ import io.realm.annotations.PrimaryKey;
 /**
  * Created by luke on 12/10/16.
  */
+/*
+TODO: Add a boolean to specify if the playlist originated from an album
+TODO: If the boolean is true, the playlist will not show in the to-be-implemented list of playlists.
+
+ */
+
 public class Playlist extends RealmObject implements Parcelable {
 
     @SuppressWarnings("unused")
@@ -26,7 +32,7 @@ public class Playlist extends RealmObject implements Parcelable {
             return new Playlist[size];
         }
     };
-    private RealmList<Song> songs;
+    private RealmList<Song> songs = new RealmList<>();
     @PrimaryKey
     private String name;
     private int lastPlayedPosition = 0;
@@ -110,11 +116,6 @@ public class Playlist extends RealmObject implements Parcelable {
     }
 
     public void addSong(Song song){
-        ArrayList<Song> temp = new ArrayList<>();
-        temp.add(song);
-        if (songs == null) {
-            songs = new RealmList<>();
-        }
-        songs.addAll(temp);
+        songs.add(song);
     }
 }

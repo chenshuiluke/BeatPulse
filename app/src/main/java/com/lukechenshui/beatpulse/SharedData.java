@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.lukechenshui.beatpulse.models.Album;
 import com.lukechenshui.beatpulse.models.Playlist;
 import com.lukechenshui.beatpulse.models.Song;
 
@@ -22,18 +23,24 @@ public class SharedData {
     private static Realm realm;
     private static RealmResults<Song> songs;
     private static RealmResults<Playlist> playlists;
+    private static RealmResults<Album> albums;
     private static String origin;
     public static void init(){
         realm = Realm.getDefaultInstance();
         songs = realm.where(Song.class).findAll();
         playlists = realm.where(Playlist.class).findAll();
+        albums = realm.where(Album.class).findAll();
 
         for(Song song : songs){
             Log.d(TAG, "Song loaded:" + song.getName());
         }
 
         for(Playlist playlist : playlists){
-            Log.d(TAG, "Playlist loaded:" + playlist.getName());
+            Log.d(TAG, "Playlist loaded:" + playlist.getName() + " number of songs: " + playlist.getSongs().size());
+        }
+
+        for (Album album : albums) {
+            Log.d(TAG, "Album loaded:" + album.getName() + " number of songs: " + album.getSongs().size());
         }
     }
 

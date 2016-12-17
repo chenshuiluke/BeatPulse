@@ -20,7 +20,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
@@ -33,6 +33,6 @@ dependencies {
     compile 'com.github.markushi:circlebutton:1.1'
     compile 'com.google.android.exoplayer:exoplayer:r2.0.4'
     compile 'pl.bclogic:pulsator4droid:1.0.3'
-
     testCompile 'junit:junit:4.12'
+    compile 'org:jaudiotagger:2.0.3'
 }

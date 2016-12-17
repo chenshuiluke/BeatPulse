@@ -22,21 +22,6 @@ public class Config {
     private static Drawer activeDrawer;
     private static Song lastSong;
 
-    public interface ACTION {
-        public static String MAIN_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.main";
-        public static String INIT_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.init";
-        public static String PREV_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.prev";
-        public static String PLAY_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.play";
-        public static String PAUSE_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.pause";
-        public static String NEXT_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.next";
-        public static String STARTFOREGROUND_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.startforeground";
-        public static String STOPFOREGROUND_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.stopforeground";
-    }
-
-    public interface NOTIFICATION_ID {
-        public static int MUSIC_SERVICE = 101;
-    }
-    
     public static String getLastFolderLocation(Context context) {
         SharedPreferences sharedPref = context.getSharedPreferences(
                 context.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
@@ -69,7 +54,7 @@ public class Config {
         String lastSongLocation = sharedPref.getString("lastSong", null);
         if(lastSongLocation != null){
             File file = new File(lastSongLocation);
-            lastSong = new Song(file.getName(), file);
+            lastSong = new Song(file);
             return lastSong;
         }
         else{
@@ -85,5 +70,20 @@ public class Config {
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString("lastSong", lastSong.getFile().getAbsolutePath());
         editor.commit();
+    }
+
+    public interface ACTION {
+        String MAIN_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.main";
+        String INIT_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.init";
+        String PREV_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.prev";
+        String PLAY_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.play";
+        String PAUSE_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.pause";
+        String NEXT_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.next";
+        String STARTFOREGROUND_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.startforeground";
+        String STOPFOREGROUND_ACTION = "com.lukechenshui.beatpulse.services.musicservice.action.stopforeground";
+    }
+
+    public interface NOTIFICATION_ID {
+        int MUSIC_SERVICE = 101;
     }
 }

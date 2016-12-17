@@ -14,7 +14,9 @@ import android.widget.Toast;
 import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.DrawerInitializer;
 import com.lukechenshui.beatpulse.R;
+import com.lukechenshui.beatpulse.SharedData;
 import com.lukechenshui.beatpulse.Utility;
+import com.lukechenshui.beatpulse.models.Album;
 import com.lukechenshui.beatpulse.models.Playlist;
 import com.lukechenshui.beatpulse.models.Song;
 import com.lukechenshui.beatpulse.services.MusicService;
@@ -24,6 +26,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import io.realm.Realm;
+import io.realm.RealmList;
 import io.realm.RealmResults;
 
 public class MainActivity extends ActionBarActivity {
@@ -114,7 +117,7 @@ public class MainActivity extends ActionBarActivity {
 
             for(File file : fileList){
                 Log.d(TAG, "Found song: " + file);
-                Song song = new Song(file.getName(), file);
+                Song song = new Song(file);
                 realm.copyToRealmOrUpdate(song);
             }
             Log.d(TAG, "External Storage: " + externalStorage);
@@ -126,15 +129,25 @@ public class MainActivity extends ActionBarActivity {
 
             for(File file : fileList){
                 Log.d(TAG, "Found song: " + file);
-                Song song = new Song(file.getName(), file);
+                Song song = new Song(file);
                 realm.copyToRealmOrUpdate(song);
             }
             Log.d(TAG, "Secondary Storage: " + secondaryStorage);
         }
+        realm.commitTransaction();
+        realm.beginTransaction();
+        SharedData.init();
+        RealmList<Song> allSongs = SharedData.getAllSongs();
 
+        for (Song song : allSongs) {
+            String albumName = song.getAlbum();
+            Album album = realm.where(Album.class).equalTo("name", albumName).findFirst();
 
-
-
+            if (album == null) {
+                album = realm.createObject(Album.class, albumName);
+            }
+            album.addSong(song);
+        }
         realm.commitTransaction();
     }
 }

@@ -79,7 +79,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileHolder> {
                             Realm realm = Realm.getDefaultInstance();
                             realm.beginTransaction();
 
-                            Song song = new Song(currentFile.getName(), currentFile);
+                            Song song = new Song(currentFile);
                             File parentFile = currentFile.getParentFile();
                             String playlistName = parentFile != null ? parentFile.getName() : "Unknown Playlist";
                             Intent intent = new Intent(context, DrawerInitializer.getDrawerActivities().get(Config.NOW_PLAYING_DRAWER_ITEM_POS));
