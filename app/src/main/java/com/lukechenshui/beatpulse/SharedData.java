@@ -74,9 +74,13 @@ public class SharedData {
         RealmList<Album> albums = getAllAlbums();
         RealmList<Song> songs = new RealmList<>();
         for (Album album : albums) {
-            if (album.getName().equals(name)) {
-                songs = album.getSongs();
-                break;
+            if (album.getName() != null && name != null) {
+                if (album.getName().equals(name)) {
+                    if (album.getSongs() != null) {
+                        songs = album.getSongs();
+                        break;
+                    }
+                }
             }
         }
         return songs;
