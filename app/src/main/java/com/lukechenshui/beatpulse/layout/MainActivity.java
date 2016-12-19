@@ -103,13 +103,13 @@ public class MainActivity extends ActionBarActivity {
         if(firstRun){
             scanForMusic();
             firstRun = false;
-/*
+
             if(Config.getLastSong(getApplicationContext()) != null){
                 drawer.setSelection(Config.NOW_PLAYING_DRAWER_ITEM_POS+1, true);
             } else {
                 drawer.setSelection(Config.ALL_SONGS_DRAWER_ITEM_POS+1, true);
             }
-*/
+
         }
         populateAlbumList();
     }
