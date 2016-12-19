@@ -29,19 +29,19 @@ public class DrawerInitializer {
     private static int selectedItemPos;
 
     public static Drawer createDrawer(final Context context, final Activity activity, final Toolbar toolbar) {
-        PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_item_home);
+        PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.drawer_item_albums);
         SecondaryDrawerItem item2 = new SecondaryDrawerItem().withIdentifier(2).withName(R.string.all_songs_item_home);
         SecondaryDrawerItem item3 = new SecondaryDrawerItem().withIdentifier(3).withName(R.string.drawer_item_browse);
         SecondaryDrawerItem item4 = new SecondaryDrawerItem().withIdentifier(4).withName(R.string.drawer_item_now_playing);
         final HashMap<Integer, String> drawerItemNames = new HashMap<>();
 
-        drawerItemNames.put(Config.HOME_DRAWER_ITEM_POS, "Home");
+        drawerItemNames.put(Config.ALBUM_DRAWER_ITEM_POS, "Albums");
         drawerItemNames.put(Config.ALL_SONGS_DRAWER_ITEM_POS, "All Songs");
         drawerItemNames.put(Config.BROWSE_DRAWER_ITEM_POS, "Browse");
         drawerItemNames.put(Config.NOW_PLAYING_DRAWER_ITEM_POS, "Now Playing");
 
 
-        drawerActivities.put(Config.HOME_DRAWER_ITEM_POS, MainActivity.class);
+        drawerActivities.put(Config.ALBUM_DRAWER_ITEM_POS, MainActivity.class);
         drawerActivities.put(Config.ALL_SONGS_DRAWER_ITEM_POS, AllSongsActivity.class);
         drawerActivities.put(Config.BROWSE_DRAWER_ITEM_POS, BrowsingActivity.class);
         drawerActivities.put(Config.NOW_PLAYING_DRAWER_ITEM_POS, PlayActivity.class);

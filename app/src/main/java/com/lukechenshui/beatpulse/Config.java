@@ -14,7 +14,7 @@ import java.io.File;
  */
 
 public class Config {
-    public static final int HOME_DRAWER_ITEM_POS = 0;
+    public static final int ALBUM_DRAWER_ITEM_POS = 0;
     public static final int ALL_SONGS_DRAWER_ITEM_POS = 1;
     public static final int BROWSE_DRAWER_ITEM_POS = 2;
     public static final int NOW_PLAYING_DRAWER_ITEM_POS = 3;

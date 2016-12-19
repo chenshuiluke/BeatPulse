@@ -97,7 +97,7 @@ public class MainActivity extends ActionBarActivity {
 
         Realm realm = Realm.getDefaultInstance();
         RealmResults<Song> results = realm.where(Song.class).findAll();
-        drawer.setSelection(Config.HOME_DRAWER_ITEM_POS+1, false);
+        drawer.setSelection(Config.ALBUM_DRAWER_ITEM_POS + 1, false);
 
 
         if(firstRun){
