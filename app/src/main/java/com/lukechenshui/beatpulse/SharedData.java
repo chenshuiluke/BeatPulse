@@ -60,6 +60,28 @@ public class SharedData {
         return list;
     }
 
+    public static RealmList<Album> getAllAlbums() {
+        RealmList<Album> list = new RealmList<>();
+        if (albums != null) {
+            list.addAll(albums);
+        }
+
+        return list;
+    }
+
+    public static RealmList<Song> getAlbumSongs(String name) {
+        init();
+        RealmList<Album> albums = getAllAlbums();
+        RealmList<Song> songs = new RealmList<>();
+        for (Album album : albums) {
+            if (album.getName().equals(name)) {
+                songs = album.getSongs();
+                break;
+            }
+        }
+        return songs;
+    }
+
     public static String getOrigin(Context context) {
         SharedPreferences sharedPref = context.getSharedPreferences(
                 context.getString(R.string.preference_file_key), Context.MODE_PRIVATE);

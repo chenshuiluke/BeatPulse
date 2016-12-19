@@ -301,6 +301,10 @@ public class MusicService extends Service {
                         break;
                     case "folder":
                         songs = SharedData.getSongsFromFolder(song);
+                        break;
+                    default:
+                        songs = SharedData.getAlbumSongs(origin);
+                        break;
                 }
             } else {
                 songs = SharedData.getAllSongs();

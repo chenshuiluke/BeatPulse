@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.Toast;
@@ -16,6 +18,7 @@ import com.lukechenshui.beatpulse.DrawerInitializer;
 import com.lukechenshui.beatpulse.R;
 import com.lukechenshui.beatpulse.SharedData;
 import com.lukechenshui.beatpulse.Utility;
+import com.lukechenshui.beatpulse.adapters.AlbumAdapter;
 import com.lukechenshui.beatpulse.models.Album;
 import com.lukechenshui.beatpulse.models.Playlist;
 import com.lukechenshui.beatpulse.models.Song;
@@ -33,6 +36,8 @@ public class MainActivity extends ActionBarActivity {
     private static final String TAG = "MainActivity";
     private static boolean firstRun = true;
     private final int REQUEST_PERMISSIONS = 15;
+    AlbumAdapter albumAdapter;
+    private RecyclerView albumList;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -65,6 +70,10 @@ public class MainActivity extends ActionBarActivity {
         Realm.init(getApplicationContext());
         setContentView(R.layout.activity_main);
 
+        albumList = (RecyclerView) findViewById(R.id.albumList);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
+        albumList.setLayoutManager(layoutManager);
+        populateAlbumList();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
                 || ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_PERMISSIONS);
@@ -94,12 +103,15 @@ public class MainActivity extends ActionBarActivity {
         if(firstRun){
             scanForMusic();
             firstRun = false;
+/*
             if(Config.getLastSong(getApplicationContext()) != null){
                 drawer.setSelection(Config.NOW_PLAYING_DRAWER_ITEM_POS+1, true);
             } else {
                 drawer.setSelection(Config.ALL_SONGS_DRAWER_ITEM_POS+1, true);
             }
+*/
         }
+        populateAlbumList();
     }
     public void scanForMusic(){
         Realm realm = Realm.getDefaultInstance();
@@ -149,5 +161,16 @@ public class MainActivity extends ActionBarActivity {
             album.addSong(song);
         }
         realm.commitTransaction();
+        SharedData.init();
+
+    }
+
+    private void populateAlbumList() {
+        if (albumAdapter == null) {
+            albumAdapter = new AlbumAdapter(this, SharedData.getAllAlbums());
+            albumList.setAdapter(albumAdapter);
+        } else {
+            albumAdapter.setData(SharedData.getAllAlbums());
+        }
     }
 }
