@@ -380,7 +380,11 @@ public class MusicService extends Service {
                 }
                 else{
                     Random random = new Random();
-                    int position = random.nextInt(playlist.getSongs().size() - 1);
+                    int position = 0;
+                    if (playlist.getSongs().size() > 1) {
+                        position = random.nextInt(playlist.getSongs().size() - 1);
+                    }
+
                     nextSong = playlist.getSongs().get(position);
                 }
             }
