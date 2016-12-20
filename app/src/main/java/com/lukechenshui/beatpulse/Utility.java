@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -152,11 +151,15 @@ public class Utility {
         files = null;
         ArrayList<File> secondaryList = new ArrayList<>();
         ArrayList<File> unnecessaryFolders = new ArrayList<>();
-        for(File file : fileList){
-            if(file.isDirectory()){
-                secondaryList.addAll(getListOfFoldersAndAudioFilesInDirectory(context, file));
-                unnecessaryFolders.add(file);
+        try {
+            for (File file : fileList) {
+                if (file.isDirectory()) {
+                    secondaryList.addAll(getListOfFoldersAndAudioFilesInDirectory(context, file));
+                    unnecessaryFolders.add(file);
+                }
             }
+        } catch (StackOverflowError exc) {
+            Log.d(TAG, "StackOverflow occurred!", exc);
         }
         for(int counter = 0; counter < secondaryList.size(); counter++){
             File file = secondaryList.get(counter);
