@@ -71,7 +71,7 @@ public class AllSongAdapter extends RecyclerView.Adapter<AllSongAdapter.SongHold
                         SharedData.SongRequest.submitSongRequest(currentSong);
                         SharedData.PlaylistRequest.submitPlaylistRequest(playlist);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        SharedData.setOrigin(context, "all_songs");
+                        SharedData.setNowPlayingOrigin(context, "all_songs");
                         context.startActivity(intent);
 
                         ((Activity)context).finish();

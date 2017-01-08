@@ -75,7 +75,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileHolder> {
                             files.clear();
                             files = fileList;
                             notifyDataSetChanged();
-                        } else if (currentFile.getName().endsWith("mp3")) {
+                        } else if (Utility.isMusicFileSupported(currentFile)) {
                             Realm realm = Realm.getDefaultInstance();
                             realm.beginTransaction();
 
@@ -87,7 +87,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileHolder> {
                             SharedData.SongRequest.submitSongRequest(song);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             realm.commitTransaction();
-                            SharedData.setOrigin(context, "folder");
+                            SharedData.setNowPlayingOrigin(context, "folder");
                             context.startActivity(intent);
 
                             ((Activity)context).finish();

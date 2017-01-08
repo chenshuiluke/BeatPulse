@@ -89,7 +89,7 @@ public class AlbumAdapter extends SwiftAdapter {
                 public void onClick(View view) {
                     currSong = song;
                     SharedData.SongRequest.submitSongRequest(currSong);
-                    SharedData.setOrigin(context, currAlbum.getName());
+                    SharedData.setNowPlayingOrigin(context, currAlbum.getName());
                     Intent intent = new Intent(context, DrawerInitializer.getDrawerActivities().get(Config.NOW_PLAYING_DRAWER_ITEM_POS));
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(intent);

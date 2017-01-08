@@ -1,7 +1,7 @@
 package com.lukechenshui.beatpulse.layout;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -9,13 +9,10 @@ import android.support.v7.widget.Toolbar;
 import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.DrawerInitializer;
 import com.lukechenshui.beatpulse.R;
-import com.lukechenshui.beatpulse.Utility;
 import com.lukechenshui.beatpulse.adapters.AllSongAdapter;
-import com.lukechenshui.beatpulse.adapters.FileAdapter;
 import com.lukechenshui.beatpulse.models.Song;
 import com.mikepenz.materialdrawer.Drawer;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import io.realm.Realm;
@@ -27,6 +24,7 @@ public class AllSongsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Realm.init(getApplicationContext());
         setContentView(R.layout.activity_all_songs);
 
 

@@ -86,14 +86,14 @@ public class SharedData {
         return songs;
     }
 
-    public static String getOrigin(Context context) {
+    public static String getNowPlayingOrigin(Context context) {
         SharedPreferences sharedPref = context.getSharedPreferences(
                 context.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         origin = sharedPref.getString("origin", null);
         return origin;
     }
 
-    public static void setOrigin(Context context, String origin) {
+    public static void setNowPlayingOrigin(Context context, String origin) {
         SharedData.origin = origin;
         SharedPreferences sharedPref = context.getSharedPreferences(
                 context.getString(R.string.preference_file_key), Context.MODE_PRIVATE);

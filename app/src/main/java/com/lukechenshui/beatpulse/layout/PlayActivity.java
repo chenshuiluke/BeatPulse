@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
@@ -27,7 +28,10 @@ import com.lukechenshui.beatpulse.models.Song;
 import com.lukechenshui.beatpulse.services.MusicService;
 import com.mikepenz.materialdrawer.Drawer;
 
+import java.io.File;
+
 import at.markushi.ui.CircleButton;
+import io.realm.Realm;
 import pl.bclogic.pulsator4droid.library.PulsatorLayout;
 
 public class PlayActivity extends ActionBarActivity {
@@ -177,8 +181,17 @@ public class PlayActivity extends ActionBarActivity {
         drawer.setSelection(Config.NOW_PLAYING_DRAWER_ITEM_POS + 1, false);
         LocalBroadcastManager bManager = LocalBroadcastManager.getInstance(getApplicationContext());
 
+        Intent tempIntent = getIntent();
+        if (tempIntent != null) {
+            Uri uri = tempIntent.getData();
+            if (uri != null) {
+                SharedData.SongRequest.submitSongRequest(new Song(new File(uri.getPath())));
+                SharedData.setNowPlayingOrigin(getApplicationContext(), "folder");
+            }
+            Log.d(TAG, "Intent data: " + uri);
+        }
 
-        if (SharedData.getOrigin(getApplicationContext()) != null) {
+        if (SharedData.getNowPlayingOrigin(getApplicationContext()) != null) {
             IntentFilter filter = new IntentFilter();
             filter.addAction("MEDIA_PLAYER_PAUSED");
             filter.addAction("MEDIA_PLAYER_STARTED");
@@ -223,6 +236,7 @@ public class PlayActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Realm.init(getApplicationContext());
         setContentView(R.layout.activity_play);
     }
 
@@ -259,5 +273,12 @@ public class PlayActivity extends ActionBarActivity {
         if(musicService != null){
             musicService.toggleReplay();
         }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        //now getIntent() should always return the last received intent
     }
 }

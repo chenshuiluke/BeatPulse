@@ -293,7 +293,7 @@ public class MusicService extends Service {
 
             SharedData.init();
             RealmList<Song> songs = null;
-            String origin = SharedData.getOrigin(getApplicationContext());
+            String origin = SharedData.getNowPlayingOrigin(getApplicationContext());
             if (origin != null) {
                 switch (origin) {
                     case "all_songs":

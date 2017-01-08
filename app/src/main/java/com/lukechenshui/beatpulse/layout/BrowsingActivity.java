@@ -16,6 +16,8 @@ import com.mikepenz.materialdrawer.Drawer;
 import java.io.File;
 import java.util.ArrayList;
 
+import io.realm.Realm;
+
 public class BrowsingActivity extends ActionBarActivity {
     private LinearLayoutManager layoutManager;
     private RecyclerView recyclerView;
@@ -23,6 +25,7 @@ public class BrowsingActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Realm.init(getApplicationContext());
         setContentView(R.layout.activity_browsing);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.secondToolbar);
