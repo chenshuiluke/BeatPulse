@@ -68,7 +68,11 @@ public class Config {
         SharedPreferences sharedPref = context.getSharedPreferences(
                 context.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString("lastSong", lastSong.getFile().getAbsolutePath());
+        File lastSongFile = lastSong.getFile();
+        if (lastSongFile != null) {
+            editor.putString("lastSong", lastSongFile.getAbsolutePath());
+        }
+
         editor.commit();
     }
 

@@ -116,7 +116,12 @@ public class Song extends RealmObject implements Parcelable, Comparable<Song> {
     }
 
     public File getFile(){
-        return new File(fileLocation);
+        if (fileLocation != null) {
+            return new File(fileLocation);
+        } else {
+            return null;
+        }
+
     }
 
     @Override
