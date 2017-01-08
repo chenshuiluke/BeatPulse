@@ -7,6 +7,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:layout_centerInParent="true"
+    android:background="?attr/colorPrimary"
     app:pulse_color="@color/colorPrimaryLight"
     app:pulse_count="2"
     app:pulse_duration="2000"
@@ -17,10 +18,6 @@
         android:id="@+id/activity_play"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
         tools:context="com.lukechenshui.beatpulse.layout.PlayActivity">
 
         <android.support.v7.widget.Toolbar
