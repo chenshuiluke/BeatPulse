@@ -87,8 +87,12 @@ public class PlayActivity extends ActionBarActivity {
                 replayToggleButton.setImageResource(R.drawable.ic_repeat_white_24dp);
             }
 
-            if(musicService.isReplayingNoSongs()){
+            if (musicService.isStoppingAfterNextSong()) {
                 replayToggleButton.setImageResource(R.drawable.ic_stop_white_24dp);
+            }
+
+            if (musicService.isPlayingToEndOfPlaylist()) {
+                replayToggleButton.setImageResource(R.drawable.ic_play_to_end);
             }
             bound = true;
             Log.d(TAG, "Connected to music service");
@@ -141,6 +145,11 @@ public class PlayActivity extends ActionBarActivity {
                     replayToggleButton.setImageResource(R.drawable.ic_repeat_white_24dp);
 
                     Toast.makeText(context, "Replaying all songs", Toast.LENGTH_SHORT).show();
+                    break;
+                case "PLAY_TO_END":
+                    replayToggleButton.setImageResource(R.drawable.ic_play_to_end);
+
+                    Toast.makeText(context, "Playing to the end of the list", Toast.LENGTH_SHORT).show();
                     break;
             }
 
@@ -202,6 +211,7 @@ public class PlayActivity extends ActionBarActivity {
             filter.addAction("REPLAY_MODE_NONE");
             filter.addAction("REPLAY_MODE_ALL");
             filter.addAction("REPLAY_MODE_ONE");
+            filter.addAction("PLAY_TO_END");
             bManager.registerReceiver(receiver, filter);
 
             marqueeTextView = (TextView) findViewById(R.id.marqueeTextView);
@@ -253,7 +263,7 @@ public class PlayActivity extends ActionBarActivity {
 
     public void playNextSong(View view){
         if(musicService != null){
-            musicService.playNext(false);
+            musicService.playNext(false, true);
         }
     }
 

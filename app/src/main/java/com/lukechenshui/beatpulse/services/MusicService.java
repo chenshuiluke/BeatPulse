@@ -60,7 +60,8 @@ public class MusicService extends Service {
 
     public final int REPLAY_ALL = 10;
     public final int REPLAY_ONE = 11;
-    public final int REPLAY_NONE = 12;
+    public final int STOP_AFTER_NEXT = 12;
+    public final int PLAY_TO_END = 13;
 
     private final String TAG = "MusicService";
 
@@ -165,10 +166,9 @@ public class MusicService extends Service {
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
                 if(playbackState == ExoPlayer.STATE_ENDED){
                     if(replayMode == REPLAY_ONE){
-                        playNext(true);
-                    }
-                    else if(replayMode != REPLAY_NONE){
-                        playNext(false);
+                        playNext(true, false);
+                    } else if (replayMode != STOP_AFTER_NEXT) {
+                        playNext(false, false);
                     }
                 }
             }
@@ -256,10 +256,14 @@ public class MusicService extends Service {
                 intent.setAction("REPLAY_MODE_ONE");
                 break;
             case REPLAY_ONE:
-                replayMode = REPLAY_NONE;
+                replayMode = STOP_AFTER_NEXT;
                 intent.setAction("REPLAY_MODE_NONE");
                 break;
-            case REPLAY_NONE:
+            case STOP_AFTER_NEXT:
+                replayMode = PLAY_TO_END;
+                intent.setAction("PLAY_TO_END");
+                break;
+            case PLAY_TO_END:
                 replayMode = REPLAY_ALL;
                 intent.setAction("REPLAY_MODE_ALL");
                 break;
@@ -341,11 +345,21 @@ public class MusicService extends Service {
     public boolean isReplayingAllSongs(){
         return replayMode == REPLAY_ALL;
     }
-    public boolean isReplayingNoSongs(){
-        return replayMode == REPLAY_NONE;
+
+    public boolean isStoppingAfterNextSong() {
+        return replayMode == STOP_AFTER_NEXT;
     }
 
-    public void playNext(boolean replayOne){
+    public boolean isPlayingToEndOfPlaylist() {
+        return replayMode == PLAY_TO_END;
+    }
+
+    public void stopSong() {
+        pause();
+
+    }
+
+    public void playNext(boolean replayOne, boolean originatedFromButtonPress) {
         if (playlist != null && song != null) {
             loadPlaylist();
             Song nextSong = null;
@@ -365,8 +379,19 @@ public class MusicService extends Service {
                                 nextSong = playlistSongs.get(pos);
                             } else {
                                 if (playlistSongs.size() > 0) {
-                                    nextSong = playlistSongs.first();
-                                    playlist.setLastPlayedPosition(0);
+                                    if (isPlayingToEndOfPlaylist() && !originatedFromButtonPress) {
+                                        if (playlist != null) {
+                                            song = playlist.getSongs().get(0);
+                                            playlist.setLastPlayedPosition(0);
+                                        }
+                                        pause();
+                                        pausePos = new Long(0);
+                                        return;
+                                    } else {
+                                        nextSong = playlistSongs.first();
+                                        playlist.setLastPlayedPosition(0);
+                                    }
+
                                 } else {
                                     nextSong = song;
                                 }
@@ -465,7 +490,7 @@ public class MusicService extends Service {
             }
             else if (intent.getAction().equals(Config.ACTION.NEXT_ACTION)) {
                 Log.i(TAG, "Clicked Next");
-                playNext(false);
+                playNext(false, true);
                 Toast.makeText(this, "Clicked Next!", Toast.LENGTH_SHORT).show();
             } else if (intent.getAction().equals(
                     Config.ACTION.STOPFOREGROUND_ACTION)) {
