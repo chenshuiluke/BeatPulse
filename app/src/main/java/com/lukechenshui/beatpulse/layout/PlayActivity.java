@@ -14,8 +14,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,8 +57,6 @@ public class PlayActivity extends ActionBarActivity {
                 musicService.init();
                 if (SharedData.SongRequest.wasAccepted()) {
                     marqueeTextView.setText(musicService.getSong().getName());
-                    Animation marquee = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.marquee);
-                    marqueeTextView.startAnimation(marquee);
                 }
             }
 
