@@ -73,7 +73,6 @@ public class MusicService extends Service {
     Playlist playlist;
     Long pausePos = null;
     SimpleExoPlayer player;
-
     boolean showNotification;
     ExecutorService executor = Executors.newFixedThreadPool(1);
     public MusicService() {
@@ -144,6 +143,10 @@ public class MusicService extends Service {
     public void stop(){
         player.stop();
         setShowNotification(false);
+    }
+
+    public int getAudioSessionId(){
+        return player.getAudioSessionId();
     }
 
     @Override

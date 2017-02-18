@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<pl.bclogic.pulsator4droid.library.PulsatorLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,13 +7,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:layout_centerInParent="true"
-    android:background="?attr/colorPrimary"
-    app:pulse_color="@color/colorPrimaryLight"
-    app:pulse_count="2"
-    app:pulse_duration="2000"
-    app:pulse_interpolator="Linear"
-    app:pulse_repeat="0"
-    app:pulse_startFromScratch="false">
+    android:background="?attr/colorPrimary">
     <RelativeLayout
         android:id="@+id/activity_play"
         android:layout_width="match_parent"
@@ -26,11 +20,27 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             android:elevation="4dp" />
+        <com.cleveroad.audiovisualization.GLAudioVisualizationView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/visualizer_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:av_bubblesSize="@dimen/bubble_size"
+            app:av_bubblesRandomizeSizes="true"
+            app:av_wavesHeight="@dimen/wave_height"
+            app:av_wavesFooterHeight="@dimen/footer_height"
+            app:av_wavesCount="7"
+            app:av_layersCount="4"
+            app:av_backgroundColor="@color/av_color_bg"
+            app:av_bubblesPerLayer="16"
+            android:layout_below="@+id/thirdToolbar"
+            />
         <TextView
             android:id="@+id/marqueeTextView"
             android:layout_width="match_parent"
             android:layout_height="30sp"
-            android:layout_below="@+id/thirdToolbar"
+            android:layout_below="@+id/visualizer_view"
             android:background="@color/md_white_1000"
             android:focusable="true"
             android:focusableInTouchMode="true"
@@ -94,4 +104,4 @@
         </LinearLayout>
     </RelativeLayout>
 
-</pl.bclogic.pulsator4droid.library.PulsatorLayout>
+</LinearLayout>

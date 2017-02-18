@@ -17,6 +17,9 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cleveroad.audiovisualization.DbmHandler;
+import com.cleveroad.audiovisualization.GLAudioVisualizationView;
+import com.cleveroad.audiovisualization.SpeechRecognizerDbmHandler;
 import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.DrawerInitializer;
 import com.lukechenshui.beatpulse.R;
@@ -30,11 +33,9 @@ import java.io.File;
 
 import at.markushi.ui.CircleButton;
 import io.realm.Realm;
-import pl.bclogic.pulsator4droid.library.PulsatorLayout;
 
 public class PlayActivity extends ActionBarActivity {
     private final String TAG = "PlayActivity";
-    PulsatorLayout pulsator;
     private CircleButton previousSongButton;
     private CircleButton playOrPauseButton;
     private CircleButton nextSongButton;
@@ -44,7 +45,7 @@ public class PlayActivity extends ActionBarActivity {
     private TextView marqueeTextView;
     private Song currentSong;
     private Playlist currentPlaylist;
-
+    private GLAudioVisualizationView audioVisualizationView;
     private boolean bound;
     ServiceConnection connection = new ServiceConnection() {
         @Override
@@ -62,10 +63,8 @@ public class PlayActivity extends ActionBarActivity {
 
             if (musicService.isPaused()) {
                 playOrPauseButton.setImageResource(R.drawable.ic_play_arrow_black_24dp);
-                pulsator.setDuration(7000);
             } else {
                 playOrPauseButton.setImageResource(R.drawable.ic_pause_black_24dp);
-                pulsator.setDuration(2000);
             }
 
             if (musicService.isShuffling()) {
@@ -90,6 +89,7 @@ public class PlayActivity extends ActionBarActivity {
             if (musicService.isPlayingToEndOfPlaylist()) {
                 replayToggleButton.setImageResource(R.drawable.ic_play_to_end);
             }
+            audioVisualizationView.linkTo(DbmHandler.Factory.newVisualizerHandler(getApplicationContext(), musicService.getAudioSessionId()));
             bound = true;
             Log.d(TAG, "Connected to music service");
 
@@ -108,12 +108,10 @@ public class PlayActivity extends ActionBarActivity {
                 case "MEDIA_PLAYER_PAUSED":
                     playOrPauseButton.setImageResource(R.drawable.ic_play_arrow_black_24dp);
                     marqueeTextView.setText(musicService.getSong().getName());
-                    pulsator.setDuration(7000);
                     break;
                 case "MEDIA_PLAYER_STARTED":
                     playOrPauseButton.setImageResource(R.drawable.ic_pause_black_24dp);
                     marqueeTextView.setText(musicService.getSong().getName());
-                    pulsator.setDuration(2000);
                     break;
                 case "PLAYBACK_MODE_SHUFFLE":
                     shuffleToggleButton.setImageResource(R.drawable.ic_shuffle_white_24dp);
@@ -221,8 +219,6 @@ public class PlayActivity extends ActionBarActivity {
             Intent intent = new Intent(this, MusicService.class);
             bindService(intent, connection, BIND_AUTO_CREATE);
             //Song temp = Config.getLastSong(getApplicationContext());
-            pulsator = (PulsatorLayout) findViewById(R.id.pulsator);
-            pulsator.start();
         }
 
     }
@@ -244,6 +240,8 @@ public class PlayActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         Realm.init(getApplicationContext());
         setContentView(R.layout.activity_play);
+        audioVisualizationView = (GLAudioVisualizationView) findViewById(R.id.visualizer_view);
+
     }
 
     public void startOrPauseMediaPlayer(View view){

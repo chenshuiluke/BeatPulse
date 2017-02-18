@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/BeatPulse.iml" filepath="$PROJECT_DIR$/BeatPulse.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/beatpulse.iml" filepath="$PROJECT_DIR$/beatpulse.iml" />
     </modules>
   </component>
 </project>
