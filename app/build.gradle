@@ -32,8 +32,8 @@ dependencies {
     compile 'com.android.support:support-v4:25.0.1'
     compile 'com.github.markushi:circlebutton:1.1'
     compile 'com.google.android.exoplayer:exoplayer:r2.0.4'
-    compile 'pl.bclogic:pulsator4droid:1.0.3'
     testCompile 'junit:junit:4.12'
     compile 'org:jaudiotagger:2.0.3'
     compile 'com.vkondrav.swiftadapter:swift-adapter:0.2.1'
+    compile 'com.github.aliab:circular-music-progressbar:v1.1.1'
 }
