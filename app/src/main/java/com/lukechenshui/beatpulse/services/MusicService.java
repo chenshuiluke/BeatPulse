@@ -105,21 +105,20 @@ public class MusicService extends Service {
     public void play(){
         if (song != null) {
             try {
-                DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(getApplicationContext(),
-                        Util.getUserAgent(getApplicationContext(), "BeatPulse"));
-// Produces Extractor instances for parsing the media data.
-                ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-// This is the MediaSource representing the media to be played.
-                MediaSource songSource = new ExtractorMediaSource(song.getFileUri(),
-                        dataSourceFactory, extractorsFactory, null, null);
-                player.prepare(songSource);
-
-                player.setPlayWhenReady(true);
 
                 if (pausePos != null) {
                     player.seekTo(pausePos);
+                } else {
+                    DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(getApplicationContext(),
+                            Util.getUserAgent(getApplicationContext(), "BeatPulse"));
+// Produces Extractor instances for parsing the media data.
+                    ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+// This is the MediaSource representing the media to be played.
+                    MediaSource songSource = new ExtractorMediaSource(song.getFileUri(),
+                            dataSourceFactory, extractorsFactory, null, null);
+                    player.prepare(songSource);
                 }
-
+                player.setPlayWhenReady(true);
             } catch (Exception exc) {
                 //Catches the exception raised when preparing the same FFmpegMediaPlayer multiple times.
                 Log.d(TAG, "Exception occurred while starting to play " + song.getName(), exc);
@@ -207,6 +206,7 @@ public class MusicService extends Service {
             loadPlaylist();
         }
     }
+
 
     public int getPlaybackMode() {
         SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(
@@ -360,6 +360,7 @@ public class MusicService extends Service {
     }
 
     public void playNext(boolean replayOne, boolean originatedFromButtonPress) {
+        pausePos = null;
         if (playlist != null && song != null) {
             loadPlaylist();
             Song nextSong = null;
@@ -421,6 +422,7 @@ public class MusicService extends Service {
     }
 
     public void playPrevious(){
+        pausePos = null;
         if (playlist != null && song != null) {
             loadPlaylist();
             Song nextSong = null;
@@ -608,9 +610,16 @@ public class MusicService extends Service {
         }
     }
 
+    public void setPosition(long position) {
+        player.seekTo(position);
+        pausePos = position;
+    }
+
     public class MusicBinder extends Binder {
         public MusicService getService() {
             return MusicService.this;
         }
     }
+
+
 }

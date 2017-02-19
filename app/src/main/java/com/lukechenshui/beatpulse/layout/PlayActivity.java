@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.exoplayer2.ExoPlayer;
 import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.DrawerInitializer;
 import com.lukechenshui.beatpulse.R;
@@ -25,6 +26,7 @@ import com.lukechenshui.beatpulse.models.Playlist;
 import com.lukechenshui.beatpulse.models.Song;
 import com.lukechenshui.beatpulse.services.MusicService;
 import com.mikepenz.materialdrawer.Drawer;
+import com.triggertrap.seekarc.SeekArc;
 
 import java.io.File;
 
@@ -42,7 +44,7 @@ public class PlayActivity extends ActionBarActivity {
     private TextView marqueeTextView;
     private Song currentSong;
     private Playlist currentPlaylist;
-
+    private SeekArc progressBar;
     private boolean bound;
     ServiceConnection connection = new ServiceConnection() {
         @Override
@@ -88,7 +90,7 @@ public class PlayActivity extends ActionBarActivity {
             }
             bound = true;
             Log.d(TAG, "Connected to music service");
-
+            continuouslyUpdateProgressBar();
         }
 
         @Override
@@ -170,6 +172,25 @@ public class PlayActivity extends ActionBarActivity {
     }
 
     private void init(){
+        progressBar = (SeekArc) findViewById(R.id.progressBar);
+        progressBar.setOnSeekArcChangeListener(new SeekArc.OnSeekArcChangeListener() {
+            @Override
+            public void onProgressChanged(SeekArc seekArc, int i, boolean fromUser) {
+                if (fromUser) {
+                    ExoPlayer player = musicService.getPlayer();
+                    musicService.setPosition((long) (((float) i / (float) 100) * player.getDuration()));
+                }
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekArc seekArc) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekArc seekArc) {
+            }
+        });
         Toolbar toolbar = (Toolbar) findViewById(R.id.thirdToolbar);
         setSupportActionBar(toolbar);
         Drawer drawer = DrawerInitializer.createDrawer(this, this, toolbar);
@@ -278,5 +299,36 @@ public class PlayActivity extends ActionBarActivity {
         super.onNewIntent(intent);
         setIntent(intent);
         //now getIntent() should always return the last received intent
+    }
+
+    public void continuouslyUpdateProgressBar() {
+        Runnable updateProgressRunnable = new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    ExoPlayer player = musicService.getPlayer();
+
+                    final long percentage = (long) (((float) player.getCurrentPosition() / (float) player.getDuration()) * 100);
+
+                    Log.d(TAG, "Player position: " + player.getCurrentPosition() + " duration: " + player.getDuration()
+                            + " percentage: " + percentage);
+                    try {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                progressBar.setProgress((int) percentage);
+                            }
+                        });
+
+                        Thread.sleep(1000);
+                    } catch (Exception exc) {
+                        Log.d(TAG, "Exception occurred while updating progressbar value:", exc);
+                    }
+                }
+            }
+        };
+        Thread thread = new Thread(updateProgressRunnable);
+        thread.start();
     }
 }

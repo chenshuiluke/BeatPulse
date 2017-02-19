@@ -7,8 +7,8 @@ android {
         applicationId "com.lukechenshui.beatpulse"
         minSdkVersion 14
         targetSdkVersion 25
-        versionCode 16
-        versionName "1.0.16"
+        versionCode 17
+        versionName "1.0.17"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -35,5 +35,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'org:jaudiotagger:2.0.3'
     compile 'com.vkondrav.swiftadapter:swift-adapter:0.2.1'
-    compile 'com.github.aliab:circular-music-progressbar:v1.1.1'
+    compile 'com.github.Triggertrap:SeekArc:v1.1'
 }

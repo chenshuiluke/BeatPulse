@@ -25,17 +25,24 @@
             android:layout_width="match_parent"
             android:layout_height="30sp"
             android:layout_below="@+id/thirdToolbar"
-            android:background="@color/md_white_1000"
+            android:background="@color/md_black_1000"
             android:focusable="true"
             android:focusableInTouchMode="true"
             android:gravity="center"
             android:singleLine="true"
             android:text="Song Name"
-            android:textColor="@color/md_black_1000"
+            android:textColor="@color/md_white_1000"
             android:textSize="16dp" />
 
-
-
+        <com.triggertrap.seekarc.SeekArc
+            android:id="@+id/progressBar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/buttonBar"
+            android:layout_below="@+id/thirdToolbar"
+            android:padding="48dp"
+            app:arcColor="@color/md_black_1000"
+            app:progressColor="@color/md_white_1000" />
         <LinearLayout
             android:id="@+id/buttonBar"
             android:layout_width="wrap_content"
