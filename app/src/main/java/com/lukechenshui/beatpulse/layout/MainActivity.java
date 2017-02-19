@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.lukechenshui.beatpulse.Config;
 import com.lukechenshui.beatpulse.DrawerInitializer;
+import com.lukechenshui.beatpulse.ExternalStorage;
 import com.lukechenshui.beatpulse.R;
 import com.lukechenshui.beatpulse.SharedData;
 import com.lukechenshui.beatpulse.Utility;
@@ -118,34 +119,21 @@ public class MainActivity extends ActionBarActivity {
         realm.beginTransaction();
         realm.delete(Song.class);
         realm.delete(Playlist.class);
-        String externalStorageString = System.getenv("EXTERNAL_STORAGE");
-        String secondaryStorageString = System.getenv("SECONDARY_STORAGE");
-        File externalStorage = null;
-        File secondaryStorage = null;
-        if(externalStorageString != null){
-            externalStorage = new File(externalStorageString);
+        File root = new File("/");
+
+        String[] storageDirs = ExternalStorage.getExternalStorageDirectories(this);
+        for (String storageDirName : storageDirs) {
+            File storageDir = new File(storageDirName);
             ArrayList<File> fileList = Utility.getListOfFoldersAndAudioFilesInDirectory(getApplicationContext(),
-                    externalStorage);
+                    storageDir);
 
             for(File file : fileList){
                 Log.d(TAG, "Found song: " + file);
                 Song song = new Song(file);
                 realm.copyToRealmOrUpdate(song);
             }
-            Log.d(TAG, "External Storage: " + externalStorage);
         }
-        if(secondaryStorageString != null){
-            secondaryStorage = new File(secondaryStorageString);
-            ArrayList<File> fileList = Utility.getListOfFoldersAndAudioFilesInDirectory(getApplicationContext(),
-                    secondaryStorage);
 
-            for(File file : fileList){
-                Log.d(TAG, "Found song: " + file);
-                Song song = new Song(file);
-                realm.copyToRealmOrUpdate(song);
-            }
-            Log.d(TAG, "Secondary Storage: " + secondaryStorage);
-        }
         realm.commitTransaction();
         realm.beginTransaction();
         SharedData.init();

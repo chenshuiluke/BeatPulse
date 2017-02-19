@@ -15,6 +15,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.ListIterator;
 
 /**
  * Created by luke on 12/10/16.
@@ -130,6 +131,32 @@ public class Utility {
 
     public static ArrayList<File> getListOfFoldersAndAudioFilesInDirectory(Context context, File directory){
         ArrayList<File> fileList = new ArrayList<>();
+        ArrayList<File> toDelete = new ArrayList<>();
+        fileList.addAll(Arrays.asList(directory.listFiles()));
+
+        ListIterator<File> iterator = fileList.listIterator();
+
+        while (iterator.hasNext()) {
+            File file = iterator.next();
+            if (file.isDirectory()) {
+                File[] subFiles = file.listFiles();
+                if (subFiles != null) {
+                    for (File subFile : subFiles) {
+                        if (isMusicFileSupported(subFile) || subFile.isDirectory()) {
+                            iterator.add(subFile);
+                        }
+
+                    }
+                }
+                toDelete.add(file);
+            }
+        }
+
+        for (File fileToDelete : toDelete) {
+            fileList.remove(fileToDelete);
+        }
+
+        /*
         try{
             directory = directory.getCanonicalFile();
         }
@@ -152,6 +179,7 @@ public class Utility {
         ArrayList<File> secondaryList = new ArrayList<>();
         ArrayList<File> unnecessaryFolders = new ArrayList<>();
         try {
+            ListIterator iterator = fileList.listIterator();
             for (File file : fileList) {
                 if (file.isDirectory()) {
                     secondaryList.addAll(getListOfFoldersAndAudioFilesInDirectory(context, file));
@@ -182,7 +210,7 @@ public class Utility {
         if(!fileList.isEmpty()){
             Collections.sort(fileList);
         }
-
+        */
         return fileList;
     }
 
