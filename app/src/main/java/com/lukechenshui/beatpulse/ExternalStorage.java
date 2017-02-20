@@ -45,65 +45,84 @@ public class ExternalStorage {
 
         List<String> results = new ArrayList<>();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) { //Method 1 for KitKat & above
-            File[] externalDirs = context.getExternalFilesDirs(null);
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) { //Method 1 for KitKat & above
+                File[] externalDirs = context.getExternalFilesDirs(null);
 
-            for (File file : externalDirs) {
-                String path = file.getPath().split("/Android")[0];
+                for (File file : externalDirs) {
+                    String path = file.getPath().split("/Android")[0];
 
-                boolean addPath = false;
+                    boolean addPath = false;
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    addPath = Environment.isExternalStorageRemovable(file);
-                } else {
-                    addPath = Environment.MEDIA_MOUNTED.equals(EnvironmentCompat.getStorageState(file));
-                }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        addPath = Environment.isExternalStorageRemovable(file);
+                    } else {
+                        addPath = Environment.MEDIA_MOUNTED.equals(EnvironmentCompat.getStorageState(file));
+                    }
 
-                if (addPath) {
-                    results.add(path);
+                    if (addPath) {
+                        results.add(path);
+                    }
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        if (results.isEmpty()) { //Method 2 for all versions
-            // better variation of: http://stackoverflow.com/a/40123073/5002496
-            String output = "";
-            try {
-                final Process process = new ProcessBuilder().command("mount | grep /dev/block/vold")
-                        .redirectErrorStream(true).start();
-                process.waitFor();
-                final InputStream is = process.getInputStream();
-                final byte[] buffer = new byte[1024];
-                while (is.read(buffer) != -1) {
-                    output = output + new String(buffer);
+        try {
+            if (results.isEmpty()) { //Method 2 for all versions
+                // better variation of: http://stackoverflow.com/a/40123073/5002496
+                String output = "";
+                try {
+                    final Process process = new ProcessBuilder().command("mount | grep /dev/block/vold")
+                            .redirectErrorStream(true).start();
+                    process.waitFor();
+                    final InputStream is = process.getInputStream();
+                    final byte[] buffer = new byte[1024];
+                    while (is.read(buffer) != -1) {
+                        output = output + new String(buffer);
+                    }
+                    is.close();
+                } catch (final Exception e) {
+                    e.printStackTrace();
                 }
-                is.close();
-            } catch (final Exception e) {
-                e.printStackTrace();
-            }
-            if (!output.trim().isEmpty()) {
-                String devicePoints[] = output.split("\n");
-                for (String voldPoint : devicePoints) {
-                    results.add(voldPoint.split(" ")[2]);
+                if (!output.trim().isEmpty()) {
+                    String devicePoints[] = output.split("\n");
+                    for (String voldPoint : devicePoints) {
+                        results.add(voldPoint.split(" ")[2]);
+                    }
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         //Below few lines is to remove paths which may not be external memory card, like OTG (feel free to comment them out)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            for (int i = 0; i < results.size(); i++) {
-                if (!results.get(i).toLowerCase().matches(".*[0-9a-f]{4}[-][0-9a-f]{4}")) {
-                    Log.d(TAG, results.get(i) + " might not be extSDcard");
-                    results.remove(i--);
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                for (int i = 0; i < results.size(); i++) {
+                    if (!results.get(i).toLowerCase().matches(".*[0-9a-f]{4}[-][0-9a-f]{4}")) {
+                        Log.d(TAG, results.get(i) + " might not be extSDcard");
+                        results.remove(i--);
+                    }
+                }
+            } else {
+                for (int i = 0; i < results.size(); i++) {
+                    if (!results.get(i).toLowerCase().contains("ext") && !results.get(i).toLowerCase().contains("sdcard")) {
+                        Log.d(TAG, results.get(i) + " might not be extSDcard");
+                        results.remove(i--);
+                    }
                 }
             }
-        } else {
-            for (int i = 0; i < results.size(); i++) {
-                if (!results.get(i).toLowerCase().contains("ext") && !results.get(i).toLowerCase().contains("sdcard")) {
-                    Log.d(TAG, results.get(i) + " might not be extSDcard");
-                    results.remove(i--);
-                }
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (System.getenv("EXTERNAL_STORAGE") != null) {
+            results.add(System.getenv("EXTERNAL_STORAGE"));
+        }
+
+        if (System.getenv("SECONDARY_STORAGE") != null) {
+            results.add(System.getenv("SECONDARY_STORAGE"));
         }
 
         String[] storageDirectories = new String[results.size()];

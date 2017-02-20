@@ -28,6 +28,7 @@ import com.mikepenz.materialdrawer.Drawer;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import io.realm.Realm;
 import io.realm.RealmList;
@@ -121,7 +122,12 @@ public class MainActivity extends ActionBarActivity {
         realm.delete(Playlist.class);
         File root = new File("/");
 
-        String[] storageDirs = ExternalStorage.getExternalStorageDirectories(this);
+        ArrayList<String> storageDirs = new ArrayList<>();
+        try {
+            storageDirs.addAll(Arrays.asList(ExternalStorage.getExternalStorageDirectories(this)));
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        }
         for (String storageDirName : storageDirs) {
             File storageDir = new File(storageDirName);
             ArrayList<File> fileList = Utility.getListOfFoldersAndAudioFilesInDirectory(getApplicationContext(),

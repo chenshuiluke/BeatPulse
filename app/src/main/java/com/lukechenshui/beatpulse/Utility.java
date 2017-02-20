@@ -134,28 +134,29 @@ public class Utility {
         ArrayList<File> toDelete = new ArrayList<>();
         fileList.addAll(Arrays.asList(directory.listFiles()));
 
-        ListIterator<File> iterator = fileList.listIterator();
-
-        while (iterator.hasNext()) {
-            File file = iterator.next();
+        for (int counter = 0; counter < fileList.size(); counter++) {
+            File file = fileList.get(counter);
             if (file.isDirectory()) {
                 File[] subFiles = file.listFiles();
                 if (subFiles != null) {
                     for (File subFile : subFiles) {
                         if (isMusicFileSupported(subFile) || subFile.isDirectory()) {
-                            iterator.add(subFile);
+                            fileList.add(subFile);
                         }
 
                     }
                 }
-                toDelete.add(file);
             }
         }
 
-        for (File fileToDelete : toDelete) {
-            fileList.remove(fileToDelete);
-        }
+        ListIterator<File> iterator = fileList.listIterator();
 
+        while (iterator.hasNext()) {
+            File file = iterator.next();
+            if (file.isDirectory()) {
+                iterator.remove();
+            }
+        }
         /*
         try{
             directory = directory.getCanonicalFile();
