@@ -65,6 +65,8 @@ public class Song extends RealmObject implements Parcelable, Comparable<Song> {
                 artist = tag.getFirst(FieldKey.ARTIST);
                 if (title.equals("")) {
                     title = name;
+                } else {
+                    name = title;
                 }
                 if (album.equals("")) {
                     album = "Unknown Album";
