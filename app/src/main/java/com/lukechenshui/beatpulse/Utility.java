@@ -132,7 +132,12 @@ public class Utility {
     public static ArrayList<File> getListOfFoldersAndAudioFilesInDirectory(Context context, File directory){
         ArrayList<File> fileList = new ArrayList<>();
         ArrayList<File> toDelete = new ArrayList<>();
-        fileList.addAll(Arrays.asList(directory.listFiles()));
+        fileList.addAll(Arrays.asList(directory.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                return (file.isDirectory()  || isMusicFileSupported(file));
+            }
+        })));
 
         for (int counter = 0; counter < fileList.size(); counter++) {
             File file = fileList.get(counter);

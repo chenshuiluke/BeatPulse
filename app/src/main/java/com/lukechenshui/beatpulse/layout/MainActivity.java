@@ -103,6 +103,7 @@ public class MainActivity extends ActionBarActivity {
 
 
         if(firstRun){
+            Toast.makeText(this, "Scanning for music...", Toast.LENGTH_LONG).show();
             scanForMusic();
             firstRun = false;
 
@@ -134,9 +135,15 @@ public class MainActivity extends ActionBarActivity {
                     storageDir);
 
             for(File file : fileList){
-                Log.d(TAG, "Found song: " + file);
-                Song song = new Song(file);
-                realm.copyToRealmOrUpdate(song);
+                try{
+                    Log.d(TAG, "Found song: " + file);
+                    Song song = new Song(file);
+                    realm.copyToRealmOrUpdate(song);
+                }
+                catch (Exception exc){
+                    exc.printStackTrace();
+                }
+
             }
         }
 
